@@ -1,7 +1,7 @@
 # Import all the modules
 
 ## The public libraries
-import os, sys, math, json, requests
+import os, sys, math, json
 
 import pathlib, sys
 sys.path.append(str(os.path.join(pathlib.Path(__file__).parent)))
@@ -9,79 +9,121 @@ sys.path.append(str(os.path.join(pathlib.Path(__file__).parent)))
 ## The local libraries
 from generator.const.main import *
 
-## The typo generator
+## The common typo generators
 from generator.addDash import addDash
-from generator.addDynamicDns import addDynamicDns
 from generator.addition import addition
-from generator.addTld import addTld
-from generator.changeDotDash import changeDotDash
 from generator.changeOrder import changeOrder
 from generator.commonMisspelling import commonMisspelling
 from generator.doubleReplacement import doubleReplacement
 from generator.homoglyph import homoglyph
 from generator.homophones import homophones
-from generator.missingDot import missingDot
 from generator.numeralSwap import numeralSwap
 from generator.omission import omission
 from generator.repetition import repetition
 from generator.replacement import replacement
 from generator.singularPluralize import singularPluralize
 from generator.stripDash import stripDash
-from generator.subdomain import subdomain
 from generator.vowelSwap import vowelSwap
-from generator.wrongTld import wrongTld
-from generator.wrongSld import wrongSld
+
+## npm-specific generators
+from generator.npm.suffix import npmSuffix
+from generator.npm.prefix import npmPrefix
+from generator.npm.scope import npmScopeSquat
+from generator.npm.separator import npmSeparator
+
+## pypi-specific generators
+from generator.pypi.suffix import pypiSuffix
+from generator.pypi.prefix import pypiPrefix
+from generator.pypi.separator import pypiSeparator
+from generator.pypi.version_suffix import pypiVersionSuffix
 
 ## The format function
 from format.output import formatOutput
 
-## The dns resolving function
-from dns_local.resolving import dnsResolving # named "dns_local" to avoid conflict with the dns library
-
 ## The utils
 from utils.parser import getArguments
-from generator.utils.get_pathetc import get_path_etc
-# sys.path.append(get_path_etc())
+from generator.utils.generator_functions import parse_package_name, reassemble_package_name
+
+# Import all the constants
+common_algo_list = const_get_common_algo_list()
+npm_algo_list = const_get_npm_algo_list()
+pypi_algo_list = const_get_pypi_algo_list()
 
 
-# Import all the constants of data from the file const/main.py
-# If you wanna add a new algorithm, you have to add it in the list algo_list
-numerals = const_get_numeral()
-algo_list = const_get_algo_name_list()
+def get_algo_list(ecosystem):
+    """Get the full list of algorithms for a given ecosystem"""
+    if ecosystem == "npm":
+        return common_algo_list + npm_algo_list
+    elif ecosystem == "pypi":
+        return common_algo_list + pypi_algo_list
+    else:
+        return common_algo_list
 
 
-def update_ddns_list():
-    try:
-        r = requests.get("https://raw.githubusercontent.com/MISP/misp-warninglists/main/lists/dynamic-dns/list.json")
-        with open(os.path.join(get_path_etc(), "dynamic-dns.json"), "w") as write_json:
-            json.dump(r.json(), write_json, indent=4)
+def runAll(package, ecosystem, limit, formatoutput=None, pathOutput=None, verbose=False, givevariations=False, keeporiginal=False, all_homoglyph=False):
+    """Run all algorithms for the given ecosystem on the package name.
 
-        print("[+] Dynamic Dns warning list updated")
-    except:
-        print("Error during update...")
-        exit(1)
-
-
-## [START] Final treatment
-
-def runAll(domain, limit, formatoutput, pathOutput, verbose=False, givevariations=False, keeporiginal=False, all_homoglyph=False):
-    """Run all algo on each domain contain in domainList"""
+    Args:
+        package: Package name (e.g., 'lodash', '@babel/core', 'requests')
+        ecosystem: 'npm' or 'pypi'
+        limit: Maximum number of variations
+        formatoutput: Output format ('text', 'json', 'regex', 'yaml')
+        pathOutput: Path for output file
+        verbose: Print progress information
+        givevariations: Include algorithm name with each variation
+        keeporiginal: Keep original package name in results
+        all_homoglyph: Generate all homoglyph permutations
+    """
 
     resultList = list()
+    algo_list = get_algo_list(ecosystem)
+
+    # For npm scoped packages, run common generators on the name part
+    scope, name = parse_package_name(package, ecosystem)
 
     for algo in algo_list:
-        if not algo == "addDynamicDns":
-            func = globals()[algo]
-            resultList = func(domain, resultList, verbose, limit, givevariations, keeporiginal)
+        func = globals()[algo]
+        if algo in common_algo_list and scope:
+            # For scoped npm packages, run common algos on name part, then reassemble
+            name_results = list()
+            name_results = func(name, name_results, verbose, limit, givevariations, keeporiginal)
+
+            # Reassemble with scope
+            for result in name_results:
+                if givevariations:
+                    scoped_result = [reassemble_package_name(scope, result[0]), result[1]]
+                    if scoped_result not in resultList:
+                        resultList.append(scoped_result)
+                else:
+                    scoped_result = reassemble_package_name(scope, result)
+                    if scoped_result not in resultList:
+                        resultList.append(scoped_result)
+        else:
+            if algo == "homoglyph":
+                if scope:
+                    name_results = list()
+                    name_results = func(name, name_results, verbose, limit, givevariations, keeporiginal, all=all_homoglyph)
+                    for result in name_results:
+                        if givevariations:
+                            scoped_result = [reassemble_package_name(scope, result[0]), result[1]]
+                            if scoped_result not in resultList:
+                                resultList.append(scoped_result)
+                        else:
+                            scoped_result = reassemble_package_name(scope, result)
+                            if scoped_result not in resultList:
+                                resultList.append(scoped_result)
+                else:
+                    resultList = func(package, resultList, verbose, limit, givevariations, keeporiginal, all=all_homoglyph)
+            else:
+                resultList = func(package, resultList, verbose, limit, givevariations, keeporiginal)
 
     if verbose:
         print(f"Total: {len(resultList)}")
 
-    formatOutput(formatoutput, resultList, domain, pathOutput, givevariations)
+    if formatoutput and pathOutput:
+        formatOutput(formatoutput, resultList, package, pathOutput, givevariations)
 
     return resultList
-
-## [END] Final treatment
 
 
 def main():
@@ -89,19 +131,16 @@ def main():
     parser = getArguments()
     args = parser.parse_args()
 
-    if args.updatedynamicdns:
-        update_ddns_list()
-
     resultList = list()
 
     # Step 2: Assign some variables
     verbose = args.v
     givevariations = args.givevariations
-    dns_limited = args.dnslimited
     keeporiginal = args.keeporiginal
+    ecosystem = args.ecosystem
 
     limit = math.inf
-    if args.limit: # If the user has specified a limit
+    if args.limit:
         limit = int(args.limit)
 
     pathOutput = args.output
@@ -110,39 +149,42 @@ def main():
         try:
             os.makedirs(pathOutput)
         except:
-            pass # If the directory already exist
+            pass
 
     # Step 3: Check the format output
     if args.formatoutput:
-        if args.formatoutput == "text" or args.formatoutput == "yara" or args.formatoutput == "yaml" or args.formatoutput == "regex":
+        if args.formatoutput in ["text", "json", "yaml", "regex"]:
             formatoutput = args.formatoutput
         else:
             print("[-] Format type error")
             exit(-1)
     else:
-        formatoutput = "text" # Default format
+        formatoutput = "text"
 
-    # Verify that a domain name is receive
-    if args.domainName:
-        domainList = args.domainName
-    elif args.filedomainName:
-        with open(args.filedomainName, "r") as read_file:
-            domainList = read_file.readlines()
+    # Verify that a package name is received
+    if args.packageName:
+        packageList = args.packageName
+    elif args.filepackageName:
+        with open(args.filepackageName, "r") as read_file:
+            packageList = [line.strip() for line in read_file.readlines() if line.strip()]
     else:
         print("[-] No Entry")
         parser.print_help()
         exit(-1)
 
-    # Step 4: Check the domain name
-    for domain in domainList:
-        if domain[0] == '.':
-            domain = domain[1:]
-        if pathOutput:
-            print(f"\n\t[*****] {domain} [*****]")
+    # Step 4: Process each package
+    for package in packageList:
+        package = package.strip()
+        if not package:
+            continue
 
-        # Go to the dedicated function
+        if pathOutput:
+            print(f"\n\t[*****] {package} ({ecosystem}) [*****]")
+
+        # Determine which algorithms to run
         if args.combo:
             base_result = list()
+            algo_list = get_algo_list(ecosystem)
             for arg in vars(args):
                 for algo in algo_list:
                     if algo.lower() == arg:
@@ -154,11 +196,11 @@ def main():
                             # First Iteration
                             if not base_result:
                                 if algo == "homoglyph":
-                                    base_result = func(domain, resultList, False, limit, givevariations, keeporiginal, all=args.all_homoglyph)
+                                    base_result = func(package, resultList, False, limit, givevariations, keeporiginal, all=args.all_homoglyph)
                                 else:
-                                    base_result = func(domain, resultList, False, limit, givevariations, keeporiginal)
+                                    base_result = func(package, resultList, False, limit, givevariations, keeporiginal)
                                 resultList = base_result.copy()
-                                
+
                                 if verbose:
                                     print(f"{len(resultList)}\n")
                             else:
@@ -176,35 +218,36 @@ def main():
                                 base_result = loc_result
 
                                 if verbose:
-                                    print(f"{len(loc_result)}\n")                                 
+                                    print(f"{len(loc_result)}\n")
         elif args.all:
-            for algo in algo_list:
-                if not algo == "addDynamicDns":
-                    func = globals()[algo]
-                    if algo == "homoglyph":
-                        resultList = func(domain, resultList, verbose, limit, givevariations, keeporiginal, all=args.all_homoglyph)
-                    else:
-                        resultList = func(domain, resultList, verbose, limit, givevariations, keeporiginal)
+            resultList = runAll(
+                package=package,
+                ecosystem=ecosystem,
+                limit=limit,
+                formatoutput=None,
+                pathOutput=None,
+                verbose=verbose,
+                givevariations=givevariations,
+                keeporiginal=keeporiginal,
+                all_homoglyph=args.all_homoglyph
+            )
         else:
+            algo_list = get_algo_list(ecosystem)
             for arg in vars(args):
                 for algo in algo_list:
                     if algo.lower() == arg:
                         if getattr(args, arg):
                             func = globals()[algo]
                             if algo == "homoglyph":
-                                resultList = func(domain, resultList, verbose, limit, givevariations, keeporiginal, all=args.all_homoglyph)
+                                resultList = func(package, resultList, verbose, limit, givevariations, keeporiginal, all=args.all_homoglyph)
                             else:
-                                resultList = func(domain, resultList, verbose, limit, givevariations, keeporiginal)
+                                resultList = func(package, resultList, verbose, limit, givevariations, keeporiginal)
 
         # Step 5: Final treatment
         if verbose:
             print(f"Total: {len(resultList)}")
 
-        formatOutput(formatoutput, resultList, domain, pathOutput, givevariations, args.betterregex)
-        
-        # Step 6: DNS resolving for each domain name
-        if args.dnsresolving:
-            dnsResolving(resultList, domain, pathOutput, verbose, givevariations, dns_limited, args.catchall)
+        formatOutput(formatoutput, resultList, package, pathOutput, givevariations, args.betterregex)
 
         resultList = list()
 
