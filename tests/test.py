@@ -37,7 +37,7 @@ def test_repetition():
     results = repetition("lodash", [], False, math.inf)
     assert len(results) > 0
     assert "llodash" in results
-    assert "llodash" in results
+    assert "loodash" in results
     assert "loddash" in results
     print("[✅] repetition")
 
