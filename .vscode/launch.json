@@ -1,0 +1,44 @@
+{
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"name": "pkg-typo-squatting: npm all",
+			"type": "debugpy",
+			"request": "launch",
+			"module": "pkg_typo_squatting.typo",
+			"args": ["-pn", "lodash", "-e", "npm", "-a", "-o", "-"],
+			"console": "integratedTerminal"
+		},
+		{
+			"name": "pkg-typo-squatting: PyPI all",
+			"type": "debugpy",
+			"request": "launch",
+			"module": "pkg_typo_squatting.typo",
+			"args": ["-pn", "requests", "-e", "pypi", "-a", "-o", "-"],
+			"console": "integratedTerminal"
+		},
+		{
+			"name": "pkg-typo-squatting: custom",
+			"type": "debugpy",
+			"request": "launch",
+			"module": "pkg_typo_squatting.typo",
+			"args": ["-pn", "${input:packageName}", "-e", "${input:ecosystem}", "-a", "-o", "-"],
+			"console": "integratedTerminal"
+		}
+	],
+	"inputs": [
+		{
+			"id": "packageName",
+			"description": "Package name to check",
+			"type": "promptString",
+			"default": "lodash"
+		},
+		{
+			"id": "ecosystem",
+			"description": "Package ecosystem",
+			"type": "pickString",
+			"options": ["npm", "pypi"],
+			"default": "npm"
+		}
+	]
+}

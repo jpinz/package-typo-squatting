@@ -20,8 +20,7 @@ pkg-typo-squatting can be installed with uv. If you don't have uv installed, you
 
 ```bash
 $ uv sync
-$ cd pkg-typo-squatting
-$ uv run typo.py -h
+$ uv run pkg-typo-squatting -h
 ```
 
 ## pip installation
@@ -33,8 +32,8 @@ $ pip3 install pkg-typo-squatting
 # Usage
 
 ```bash
-$ python3 typo.py --help
-usage: typo.py [-h] [-v] [-pn PACKAGENAME [PACKAGENAME ...]] [-fpn FILEPACKAGENAME]
+$ uv run pkg-typo-squatting --help
+usage: pkg-typo-squatting [-h] [-v] [-pn PACKAGENAME [PACKAGENAME ...]] [-fpn FILEPACKAGENAME]
                [-e {npm,pypi}] [-o OUTPUT] [-fo FORMATOUTPUT] [-br] [-l LIMIT]
                [-var] [-ko] [-a] [-om] [-repe] [-repl] [-drepl] [-cho] [-add]
                [-sd] [-vs] [-ada] [-hg] [-ahg] [-cm] [-hp] [-sp] [-ns]
@@ -60,31 +59,31 @@ usage: typo.py [-h] [-v] [-pn PACKAGENAME [PACKAGENAME ...]] [-fpn FILEPACKAGENA
 1. Generate all variations for `lodash` (npm):
 
 ```bash
-$ python3 typo.py -pn lodash -e npm -a -o .
+$ uv run pkg-typo-squatting -pn lodash -e npm -a -o .
 ```
 
 2. Generate all variations for `requests` (PyPI):
 
 ```bash
-$ python3 typo.py -pn requests -e pypi -a -o .
+$ uv run pkg-typo-squatting -pn requests -e pypi -a -o .
 ```
 
 3. Generate variations for a scoped npm package:
 
 ```bash
-$ python3 typo.py -pn "@babel/core" -e npm -a -o - -var
+$ uv run pkg-typo-squatting -pn "@babel/core" -e npm -a -o - -var
 ```
 
 4. Use specific algorithms only:
 
 ```bash
-$ python3 typo.py -pn express -e npm -om --npmsuffix --npmscopesquat -o -
+$ uv run pkg-typo-squatting -pn express -e npm -om --npmsuffix --npmscopesquat -o -
 ```
 
 5. Generate from a file of package names:
 
 ```bash
-$ python3 typo.py -fpn packages.txt -e pypi -a -o .
+$ uv run pkg-typo-squatting -fpn packages.txt -e pypi -a -o .
 ```
 
 # Used as a library

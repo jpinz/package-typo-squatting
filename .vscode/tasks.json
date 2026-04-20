@@ -1,0 +1,55 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Run: npm all algorithms",
+			"type": "shell",
+			"command": "uv run pkg-typo-squatting -pn lodash -e npm -a -o -",
+			"group": "build",
+			"problemMatcher": []
+		},
+		{
+			"label": "Run: PyPI all algorithms",
+			"type": "shell",
+			"command": "uv run pkg-typo-squatting -pn requests -e pypi -a -o -",
+			"group": "build",
+			"problemMatcher": []
+		},
+		{
+			"label": "Run: custom package",
+			"type": "shell",
+			"command": "uv run pkg-typo-squatting -pn ${input:packageName} -e ${input:ecosystem} -a -o -",
+			"group": "build",
+			"problemMatcher": []
+		},
+		{
+			"label": "Run tests",
+			"type": "shell",
+			"command": "uv run python -m pytest tests/",
+			"group": "test",
+			"problemMatcher": []
+		},
+		{
+			"label": "Lint: ruff check",
+			"type": "shell",
+			"command": "uv run ruff check .",
+			"group": "build",
+			"problemMatcher": []
+		}
+	],
+	"inputs": [
+		{
+			"id": "packageName",
+			"description": "Package name to check",
+			"type": "promptString",
+			"default": "lodash"
+		},
+		{
+			"id": "ecosystem",
+			"description": "Package ecosystem",
+			"type": "pickString",
+			"options": ["npm", "pypi"],
+			"default": "npm"
+		}
+	]
+}
