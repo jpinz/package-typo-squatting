@@ -1,16 +1,36 @@
 {
 	"name": "pkg-typo-squatting",
-	"image": "mcr.microsoft.com/devcontainers/python:3.12",
+	"image": "mcr.microsoft.com/devcontainers/python:1-3.11-bookworm",
 	"features": {
 		"ghcr.io/devcontainers/features/github-cli:1": {}
 	},
-	"postCreateCommand": "uv sync",
 	"customizations": {
 		"vscode": {
 			"extensions": [
+				"vivaxy.vscode-conventional-commits",
 				"ms-python.python",
-				"charliermarsh.ruff"
-			]
+				"ms-python.vscode-pylance",
+				"charliermarsh.ruff",
+				"github.copilot",
+				"github.copilot-chat"
+			],
+			"settings": {
+				"python.defaultInterpreterPath": ".venv/bin/python",
+				"python.terminal.activateEnvironment": true,
+				"[python]": {
+					"editor.defaultFormatter": "charliermarsh.ruff",
+					"editor.formatOnSave": true,
+					"editor.codeActionsOnSave": {
+						"source.fixAll": "explicit",
+						"source.organizeImports": "explicit"
+					}
+				}
+			}
 		}
+	},
+	"postCreateCommand": "bash .devcontainer/post-create.sh",
+	"remoteUser": "vscode",
+	"remoteEnv": {
+		"UV_LINK_MODE": "copy"
 	}
 }
