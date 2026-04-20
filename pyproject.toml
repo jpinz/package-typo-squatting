@@ -1,18 +1,16 @@
-[tool.poetry]
+[project]
 name = "pkg-typo-squatting"
 version = "1.0.0"
 description = "Generate typosquatting variations for npm and PyPI package names"
 authors = [
-	"Julian Pinzer <jupinzer@microsoft.com>"
+	{name = "Julian Pinzer", email = "jupinzer@microsoft.com"}
 ]
 maintainers = [
-	"Julian Pinzer <jupinzer@microsoft.com>"
+	{name = "Julian Pinzer", email = "jupinzer@microsoft.com"}
 ]
-license = "BSD-2-Clause"
-repository = "https://github.com/jpinz/package-typo-squatting"
-
+license = {text = "BSD-2-Clause"}
 readme = "README.md"
-
+requires-python = ">=3.8"
 keywords = [
 	"typo-squatting",
 	"typosquatting",
@@ -20,21 +18,30 @@ keywords = [
 	"pypi",
 	"supply-chain"
 ]
+dependencies = [
+	"inflect>=5.6.2",
+	"pyyaml>=6.0.1",
+	"retrie>=0.2.4",
+]
 
-include = ["etc/*"]
+[project.urls]
+Repository = "https://github.com/jpinz/package-typo-squatting"
 
-[tool.poetry.dependencies]
-python = "^3.8"
-inflect = "^5.6.2"
-pyyaml = "^6.0.1"
-retrie = "^0.2.4"
-
-[tool.poetry.dev-dependencies]
-
-[tool.poetry.scripts]
+[project.scripts]
 pkg-typo-squatting = "pkg_typo_squatting.typo:main"
 
+[dependency-groups]
+dev = [
+	"ruff>=0.4",
+]
+
+[tool.ruff]
+target-version = "py38"
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+
 [build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 

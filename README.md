@@ -16,13 +16,12 @@ The tool supports two separate systems with ecosystem-specific techniques:
 
 ## Source install
 
-pkg-typo-squatting can be installed with poetry. If you don't have poetry installed, you can do the following `curl -sSL https://install.python-poetry.org | python3 -`.
+pkg-typo-squatting can be installed with uv. If you don't have uv installed, you can do the following `curl -LsSf https://astral.sh/uv/install.sh | sh`.
 
 ```bash
-$ poetry install
-$ poetry shell
+$ uv sync
 $ cd pkg-typo-squatting
-$ python typo.py -h
+$ uv run typo.py -h
 ```
 
 ## pip installation
