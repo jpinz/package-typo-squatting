@@ -1,48 +1,29 @@
 # Import all the modules
 
 ## The public libraries
-import os, sys, math, json
+import math
+import os
+import pathlib
+import sys
 
-import pathlib, sys
 sys.path.append(str(os.path.join(pathlib.Path(__file__).parent)))
 
 ## The local libraries
-from generator.const.main import *
-
-## The common typo generators
-from generator.addDash import addDash
-from generator.addition import addition
-from generator.changeOrder import changeOrder
-from generator.commonMisspelling import commonMisspelling
-from generator.doubleReplacement import doubleReplacement
-from generator.homoglyph import homoglyph
-from generator.homophones import homophones
-from generator.numeralSwap import numeralSwap
-from generator.omission import omission
-from generator.repetition import repetition
-from generator.replacement import replacement
-from generator.singularPluralize import singularPluralize
-from generator.stripDash import stripDash
-from generator.vowelSwap import vowelSwap
-
-## npm-specific generators
-from generator.npm.suffix import npmSuffix
-from generator.npm.prefix import npmPrefix
-from generator.npm.scope import npmScopeSquat
-from generator.npm.separator import npmSeparator
-
-## pypi-specific generators
-from generator.pypi.suffix import pypiSuffix
-from generator.pypi.prefix import pypiPrefix
-from generator.pypi.separator import pypiSeparator
-from generator.pypi.version_suffix import pypiVersionSuffix
-
 ## The format function
 from format.output import formatOutput
 
+## The common typo generators
+from generator.const.main import *
+
+## npm-specific generators
+## pypi-specific generators
+from generator.utils.generator_functions import (
+    parse_package_name,
+    reassemble_package_name,
+)
+
 ## The utils
 from utils.parser import getArguments
-from generator.utils.generator_functions import parse_package_name, reassemble_package_name
 
 # Import all the constants
 common_algo_list = const_get_common_algo_list()
@@ -60,7 +41,17 @@ def get_algo_list(ecosystem):
         return common_algo_list
 
 
-def runAll(package, ecosystem, limit, formatoutput=None, pathOutput=None, verbose=False, givevariations=False, keeporiginal=False, all_homoglyph=False):
+def runAll(
+    package,
+    ecosystem,
+    limit,
+    formatoutput=None,
+    pathOutput=None,
+    verbose=False,
+    givevariations=False,
+    keeporiginal=False,
+    all_homoglyph=False,
+):
     """Run all algorithms for the given ecosystem on the package name.
 
     Args:
@@ -86,12 +77,17 @@ def runAll(package, ecosystem, limit, formatoutput=None, pathOutput=None, verbos
         if algo in common_algo_list and scope:
             # For scoped npm packages, run common algos on name part, then reassemble
             name_results = list()
-            name_results = func(name, name_results, verbose, limit, givevariations, keeporiginal)
+            name_results = func(
+                name, name_results, verbose, limit, givevariations, keeporiginal
+            )
 
             # Reassemble with scope
             for result in name_results:
                 if givevariations:
-                    scoped_result = [reassemble_package_name(scope, result[0]), result[1]]
+                    scoped_result = [
+                        reassemble_package_name(scope, result[0]),
+                        result[1],
+                    ]
                     if scoped_result not in resultList:
                         resultList.append(scoped_result)
                 else:
@@ -102,10 +98,21 @@ def runAll(package, ecosystem, limit, formatoutput=None, pathOutput=None, verbos
             if algo == "homoglyph":
                 if scope:
                     name_results = list()
-                    name_results = func(name, name_results, verbose, limit, givevariations, keeporiginal, all=all_homoglyph)
+                    name_results = func(
+                        name,
+                        name_results,
+                        verbose,
+                        limit,
+                        givevariations,
+                        keeporiginal,
+                        all=all_homoglyph,
+                    )
                     for result in name_results:
                         if givevariations:
-                            scoped_result = [reassemble_package_name(scope, result[0]), result[1]]
+                            scoped_result = [
+                                reassemble_package_name(scope, result[0]),
+                                result[1],
+                            ]
                             if scoped_result not in resultList:
                                 resultList.append(scoped_result)
                         else:
@@ -113,9 +120,19 @@ def runAll(package, ecosystem, limit, formatoutput=None, pathOutput=None, verbos
                             if scoped_result not in resultList:
                                 resultList.append(scoped_result)
                 else:
-                    resultList = func(package, resultList, verbose, limit, givevariations, keeporiginal, all=all_homoglyph)
+                    resultList = func(
+                        package,
+                        resultList,
+                        verbose,
+                        limit,
+                        givevariations,
+                        keeporiginal,
+                        all=all_homoglyph,
+                    )
             else:
-                resultList = func(package, resultList, verbose, limit, givevariations, keeporiginal)
+                resultList = func(
+                    package, resultList, verbose, limit, givevariations, keeporiginal
+                )
 
     if verbose:
         print(f"Total: {len(resultList)}")
@@ -166,7 +183,9 @@ def main():
         packageList = args.packageName
     elif args.filepackageName:
         with open(args.filepackageName, "r") as read_file:
-            packageList = [line.strip() for line in read_file.readlines() if line.strip()]
+            packageList = [
+                line.strip() for line in read_file.readlines() if line.strip()
+            ]
     else:
         print("[-] No Entry")
         parser.print_help()
@@ -196,9 +215,24 @@ def main():
                             # First Iteration
                             if not base_result:
                                 if algo == "homoglyph":
-                                    base_result = func(package, resultList, False, limit, givevariations, keeporiginal, all=args.all_homoglyph)
+                                    base_result = func(
+                                        package,
+                                        resultList,
+                                        False,
+                                        limit,
+                                        givevariations,
+                                        keeporiginal,
+                                        all=args.all_homoglyph,
+                                    )
                                 else:
-                                    base_result = func(package, resultList, False, limit, givevariations, keeporiginal)
+                                    base_result = func(
+                                        package,
+                                        resultList,
+                                        False,
+                                        limit,
+                                        givevariations,
+                                        keeporiginal,
+                                    )
                                 resultList = base_result.copy()
 
                                 if verbose:
@@ -211,9 +245,26 @@ def main():
                                         r = r[0]
 
                                     if algo == "homoglyph":
-                                        loc_result = func(r, loc_result, False, limit, givevariations, keeporiginal, all=args.all_homoglyph, combo=True)
+                                        loc_result = func(
+                                            r,
+                                            loc_result,
+                                            False,
+                                            limit,
+                                            givevariations,
+                                            keeporiginal,
+                                            all=args.all_homoglyph,
+                                            combo=True,
+                                        )
                                     else:
-                                        loc_result = func(r, loc_result, False, limit, givevariations, keeporiginal, True)
+                                        loc_result = func(
+                                            r,
+                                            loc_result,
+                                            False,
+                                            limit,
+                                            givevariations,
+                                            keeporiginal,
+                                            True,
+                                        )
                                 resultList = resultList + loc_result
                                 base_result = loc_result
 
@@ -229,7 +280,7 @@ def main():
                 verbose=verbose,
                 givevariations=givevariations,
                 keeporiginal=keeporiginal,
-                all_homoglyph=args.all_homoglyph
+                all_homoglyph=args.all_homoglyph,
             )
         else:
             algo_list = get_algo_list(ecosystem)
@@ -239,15 +290,37 @@ def main():
                         if getattr(args, arg):
                             func = globals()[algo]
                             if algo == "homoglyph":
-                                resultList = func(package, resultList, verbose, limit, givevariations, keeporiginal, all=args.all_homoglyph)
+                                resultList = func(
+                                    package,
+                                    resultList,
+                                    verbose,
+                                    limit,
+                                    givevariations,
+                                    keeporiginal,
+                                    all=args.all_homoglyph,
+                                )
                             else:
-                                resultList = func(package, resultList, verbose, limit, givevariations, keeporiginal)
+                                resultList = func(
+                                    package,
+                                    resultList,
+                                    verbose,
+                                    limit,
+                                    givevariations,
+                                    keeporiginal,
+                                )
 
         # Step 5: Final treatment
         if verbose:
             print(f"Total: {len(resultList)}")
 
-        formatOutput(formatoutput, resultList, package, pathOutput, givevariations, args.betterregex)
+        formatOutput(
+            formatoutput,
+            resultList,
+            package,
+            pathOutput,
+            givevariations,
+            args.betterregex,
+        )
 
         resultList = list()
 

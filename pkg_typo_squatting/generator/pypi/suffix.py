@@ -1,7 +1,8 @@
+from ..const.main import const_get_pypi_abbrev_swaps, const_get_pypi_suffixes
 from ..utils.generator_functions import *
-from ..const.main import const_get_pypi_suffixes
 
 PYPI_SUFFIXES = const_get_pypi_suffixes()
+PYPI_ABBREV_SWAPS = const_get_pypi_abbrev_swaps()
 
 """
 
@@ -13,7 +14,15 @@ PYPI_SUFFIXES = const_get_pypi_suffixes()
 """
 
 
-def pypiSuffix(package, resultList, verbose, limit, givevariations=False, keeporiginal=False, combo=False):
+def pypiSuffix(
+    package,
+    resultList,
+    verbose,
+    limit,
+    givevariations=False,
+    keeporiginal=False,
+    combo=False,
+):
     """Add common PyPI ecosystem suffixes like -py, -python, -lib to the package name"""
 
     if not len(resultList) >= limit:
@@ -32,8 +41,21 @@ def pypiSuffix(package, resultList, verbose, limit, givevariations=False, keepor
 
             # Also try removing the suffix if the package already has it
             if name.endswith(suffix):
-                variation = name[:-len(suffix)]
+                variation = name[: -len(suffix)]
                 if variation and variation not in resultLoc:
+                    resultLoc.append(variation)
+
+        # Abbreviation swaps: e.g. requests-py <-> requests-python
+        for short, long in PYPI_ABBREV_SWAPS:
+            short_suffix = "-" + short
+            long_suffix = "-" + long
+            if name.endswith(short_suffix):
+                variation = name[: -len(short_suffix)] + long_suffix
+                if variation not in resultLoc:
+                    resultLoc.append(variation)
+            if name.endswith(long_suffix):
+                variation = name[: -len(long_suffix)] + short_suffix
+                if variation not in resultLoc:
                     resultLoc.append(variation)
 
         if verbose:
@@ -41,10 +63,14 @@ def pypiSuffix(package, resultList, verbose, limit, givevariations=False, keepor
 
         if combo:
             rLoc = checkResult(resultLoc, resultList, givevariations, "pypiSuffix")
-            rLoc = final_treatment(package, rLoc, limit, givevariations, keeporiginal, "pypiSuffix")
+            rLoc = final_treatment(
+                package, rLoc, limit, givevariations, keeporiginal, "pypiSuffix"
+            )
             return rLoc
 
         resultList = checkResult(resultLoc, resultList, givevariations, "pypiSuffix")
-        resultList = final_treatment(package, resultList, limit, givevariations, keeporiginal, "pypiSuffix")
+        resultList = final_treatment(
+            package, resultList, limit, givevariations, keeporiginal, "pypiSuffix"
+        )
 
     return resultList

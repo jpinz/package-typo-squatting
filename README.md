@@ -37,8 +37,8 @@ usage: pkg-typo-squatting [-h] [-v] [-pn PACKAGENAME [PACKAGENAME ...]] [-fpn FI
                [-e {npm,pypi}] [-o OUTPUT] [-fo FORMATOUTPUT] [-br] [-l LIMIT]
                [-var] [-ko] [-a] [-om] [-repe] [-repl] [-drepl] [-cho] [-add]
                [-sd] [-vs] [-ada] [-hg] [-ahg] [-cm] [-hp] [-sp] [-ns]
-               [--npmsuffix] [--npmprefix] [--npmscopesquat] [--npmseparator]
-               [--pypisuffix] [--pypiprefix] [--pypiseparator] [--pypiversionsuffix]
+               [--npmsuffix] [--npmprefix] [--npmscopesquat] [--npmseparator] [--npmsubstitution]
+               [--pypisuffix] [--pypiprefix] [--pypiseparator] [--pypiversionsuffix] [--pypisubstitution]
                [-combo]
 ```
 
@@ -172,19 +172,21 @@ print(resultList)
 
 | Algorithm | Description | Example |
 |:----------|:-----------|:--------|
-| npmSuffix | Add/remove JS ecosystem suffixes | express → express-js, express-node, express-ts |
-| npmPrefix | Add/remove JS ecosystem prefixes | express → js-express, node-express |
+| npmSuffix | Add/remove JS ecosystem suffixes | express → express-js, express-node, expressjs |
+| npmPrefix | Add/remove JS ecosystem prefixes | express → js-express, node-express, jsexpress |
 | npmScopeSquat | Scope/namespace manipulation | @babel/core → core, babel-core, @babe/core |
 | npmSeparator | Swap separators (-, _, .) | my-package → my_package, my.package, mypackage |
+| npmSubstitution | Swap abbreviations anywhere in name | jsdom → javascriptdom, typescript-eslint → ts-eslint |
 
 ## PyPI-specific algorithms
 
 | Algorithm | Description | Example |
 |:----------|:-----------|:--------|
-| pypiSuffix | Add/remove Python ecosystem suffixes | requests → requests-py, requests-python, requests-lib |
+| pypiSuffix | Add/remove Python ecosystem suffixes | requests → requests-py, requests-python, requestspy |
 | pypiPrefix | Add/remove Python ecosystem prefixes | requests → py-requests, python-requests |
 | pypiSeparator | Swap separators (-, _, .) | my-package → my_package, my.package, mypackage |
 | pypiVersionSuffix | Add version numbers | requests → requests2, requests3, requests-v2 |
+| pypiSubstitution | Swap abbreviations anywhere in name | pyaudio → pythonaudio, python-dotenv → py-dotenv |
 
 # Sample output
 

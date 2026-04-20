@@ -1,7 +1,8 @@
+from ..const.main import const_get_npm_abbrev_swaps, const_get_npm_suffixes
 from ..utils.generator_functions import *
-from ..const.main import const_get_npm_suffixes
 
 NPM_SUFFIXES = const_get_npm_suffixes()
+NPM_ABBREV_SWAPS = const_get_npm_abbrev_swaps()
 
 """
 
@@ -13,7 +14,15 @@ NPM_SUFFIXES = const_get_npm_suffixes()
 """
 
 
-def npmSuffix(package, resultList, verbose, limit, givevariations=False, keeporiginal=False, combo=False):
+def npmSuffix(
+    package,
+    resultList,
+    verbose,
+    limit,
+    givevariations=False,
+    keeporiginal=False,
+    combo=False,
+):
     """Add common npm ecosystem suffixes like -js, -node, -ts to the package name"""
 
     if not len(resultList) >= limit:
@@ -32,8 +41,21 @@ def npmSuffix(package, resultList, verbose, limit, givevariations=False, keepori
 
             # Also try removing the suffix if the package already has it
             if name.endswith(suffix):
-                variation = name[:-len(suffix)]
+                variation = name[: -len(suffix)]
                 if variation and variation not in resultLoc:
+                    resultLoc.append(variation)
+
+        # Abbreviation swaps: e.g. express-js <-> express-javascript
+        for short, long in NPM_ABBREV_SWAPS:
+            short_suffix = "-" + short
+            long_suffix = "-" + long
+            if name.endswith(short_suffix):
+                variation = name[: -len(short_suffix)] + long_suffix
+                if variation not in resultLoc:
+                    resultLoc.append(variation)
+            if name.endswith(long_suffix):
+                variation = name[: -len(long_suffix)] + short_suffix
+                if variation not in resultLoc:
                     resultLoc.append(variation)
 
         if verbose:
@@ -41,10 +63,14 @@ def npmSuffix(package, resultList, verbose, limit, givevariations=False, keepori
 
         if combo:
             rLoc = checkResult(resultLoc, resultList, givevariations, "npmSuffix")
-            rLoc = final_treatment(package, rLoc, limit, givevariations, keeporiginal, "npmSuffix")
+            rLoc = final_treatment(
+                package, rLoc, limit, givevariations, keeporiginal, "npmSuffix"
+            )
             return rLoc
 
         resultList = checkResult(resultLoc, resultList, givevariations, "npmSuffix")
-        resultList = final_treatment(package, resultList, limit, givevariations, keeporiginal, "npmSuffix")
+        resultList = final_treatment(
+            package, resultList, limit, givevariations, keeporiginal, "npmSuffix"
+        )
 
     return resultList
