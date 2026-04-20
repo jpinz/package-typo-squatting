@@ -3,53 +3,38 @@ from .utils.generator_functions import *
 
 """
 
-   Original Domain        Typosquatted Domain
+   Original Package        Typosquatted Package
   +----------------+     +--------------------+
-  |    circl.lu    |     |      cirl.lu       |
+  |    lodash      |     |      lodsh         |
   +----------------+     +--------------------+
 
 """
 
 # Omission
-def omission(domain, resultList, verbose, limit, givevariations=False,  keeporiginal=False, combo=False):
-    """Leave out a letter of the domain name"""
+def omission(package, resultList, verbose, limit, givevariations=False, keeporiginal=False, combo=False):
+    """Leave out a letter of the package name"""
 
     if not len(resultList) >= limit:
         if verbose:
             print("[+] Omission")
 
         resultLoc = list()
-        loclist = list()
+        name = package
 
-        prefix, domain_without_tld, tld = parse_domain(domain)
-        domainList = [domain_without_tld]
-
-        for name in domainList:
-            for i in range(0,len(name)):
-                resultLoc.append(prefix + name)
-                loc = prefix + name[0:i]
-                loc += name[i+1:len(name)]
-
-                if loc not in resultLoc:
-                    resultLoc.append(loc)
-
-            if resultLoc:
-                loclist.append(resultLoc)
-                resultLoc = list()
-
-        loclist.append([tld])
-
-        rLoc = globalAppend(loclist)
+        for i in range(0, len(name)):
+            variation = name[0:i] + name[i+1:len(name)]
+            if variation and variation not in resultLoc:
+                resultLoc.append(variation)
 
         if verbose:
-            print(f"{len(rLoc)}\n")
+            print(f"{len(resultLoc)}\n")
 
         if combo:
-            rLoc = checkResult(rLoc, resultList, givevariations, "omission")
-            rLoc = final_treatment(domain, rLoc, limit, givevariations, keeporiginal, "omission")
+            rLoc = checkResult(resultLoc, resultList, givevariations, "omission")
+            rLoc = final_treatment(package, rLoc, limit, givevariations, keeporiginal, "omission")
             return rLoc
 
-        resultList = checkResult(rLoc, resultList, givevariations, "omission")
-        resultList = final_treatment(domain, resultList, limit, givevariations, keeporiginal, "omission")
+        resultList = checkResult(resultLoc, resultList, givevariations, "omission")
+        resultList = final_treatment(package, resultList, limit, givevariations, keeporiginal, "omission")
 
     return resultList

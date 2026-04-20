@@ -4,35 +4,35 @@
 
 SIMILAR_CHAR = {
     '0': ['o'],
-    '1': ['l', 'i', 'ı'],
-    '2': ['ƻ'],
-    '5': ['ƽ'],
-    'a': ['à', 'á', 'à', 'â', 'ã', 'ä', 'å', 'ɑ', 'ạ', 'ǎ', 'ă', 'ȧ', 'ą', 'ə'],
-    'b': ['d', 'ʙ', 'ɓ', 'ḃ', 'ḅ', 'ḇ', 'ƅ'],
-    'c': ['e', 'ƈ', 'ċ', 'ć', 'ç', 'č', 'ĉ', 'ᴄ'],
-    'd': ['b', 'cl', 'ɗ', 'đ', 'ď', 'ɖ', 'ḑ', 'ḋ', 'ḍ', 'ḏ', 'ḓ'],
-    'e': ['c', 'é', 'è', 'ê', 'ë', 'ē', 'ĕ', 'ě', 'ė', 'ẹ', 'ę', 'ȩ', 'ɇ', 'ḛ'],
-    'f': ['ƒ', 'ḟ'],
-    'g': ['q', 'ɢ', 'ɡ', 'ġ', 'ğ', 'ǵ', 'ģ', 'ĝ', 'ǧ', 'ǥ'],
-    'h': ['ĥ', 'ȟ', 'ħ', 'ɦ', 'ḧ', 'ḩ', 'ⱨ', 'ḣ', 'ḥ', 'ḫ', 'ẖ'],
-    'i': ['1', 'l', 'í', 'ì', 'ï', 'ı', 'ɩ', 'ǐ', 'ĭ', 'ỉ', 'ị', 'ɨ', 'ȋ', 'ī', 'ɪ'],
-    'j': ['ʝ', 'ǰ', 'ɉ', 'ĵ'],
-    'k': ['lc', 'ḳ', 'ḵ', 'ⱪ', 'ķ', 'ᴋ'],
-    'l': ['1', 'i', 'ɫ', 'ł', 'ı', 'ɩ'],
-    'm': ['n', 'nn', 'rn', 'rr', 'ṁ', 'ṃ', 'ᴍ', 'ɱ', 'ḿ'],
-    'n': ['m', 'r', 'ń', 'ṅ', 'ṇ', 'ṉ', 'ñ', 'ņ', 'ǹ', 'ň', 'ꞑ'],
-    'o': ['0', 'ȯ', 'ọ', 'ỏ', 'ơ', 'ó', 'ö', 'ᴏ'],
-    'p': ['ƿ', 'ƥ', 'ṕ', 'ṗ'],
-    'q': ['g', 'ʠ'],
-    'r': ['ʀ', 'ɼ', 'ɽ', 'ŕ', 'ŗ', 'ř', 'ɍ', 'ɾ', 'ȓ', 'ȑ', 'ṙ', 'ṛ', 'ṟ'],
-    's': ['ʂ', 'ś', 'ṣ', 'ṡ', 'ș', 'ŝ', 'š', 'ꜱ'],
-    't': ['ţ', 'ŧ', 'ṫ', 'ṭ', 'ț', 'ƫ'],
-    'u': ['ᴜ', 'ǔ', 'ŭ', 'ü', 'ʉ', 'ù', 'ú', 'û', 'ũ', 'ū', 'ų', 'ư', 'ů', 'ű', 'ȕ', 'ȗ', 'ụ'],
-    'v': ['ṿ', 'ⱱ', 'ᶌ', 'ṽ', 'ⱴ', 'ᴠ'],
-    'w': ['vv', 'ŵ', 'ẁ', 'ẃ', 'ẅ', 'ⱳ', 'ẇ', 'ẉ', 'ẘ', 'ᴡ'],
-    'x': ['ẋ', 'ẍ'],
-    'y': ['ʏ', 'ý', 'ÿ', 'ŷ', 'ƴ', 'ȳ', 'ɏ', 'ỿ', 'ẏ', 'ỵ'],
-    'z': ['ʐ', 'ż', 'ź', 'ᴢ', 'ƶ', 'ẓ', 'ẕ', 'ⱬ']
+    '1': ['l', 'i'],
+    '2': ['z'],
+    '5': ['s'],
+    'a': ['e', 'o'],
+    'b': ['d', 'p'],
+    'c': ['e', 'k'],
+    'd': ['b', 'cl'],
+    'e': ['c', 'a'],
+    'f': ['t'],
+    'g': ['q', 'j'],
+    'h': ['n', 'b'],
+    'i': ['1', 'l', 'j'],
+    'j': ['i', 'g'],
+    'k': ['lc', 'c'],
+    'l': ['1', 'i'],
+    'm': ['n', 'nn', 'rn', 'rr'],
+    'n': ['m', 'r'],
+    'o': ['0', 'a'],
+    'p': ['q', 'b'],
+    'q': ['g', 'p'],
+    'r': ['n', 'v'],
+    's': ['5', 'z'],
+    't': ['f', 'l'],
+    'u': ['v', 'w'],
+    'v': ['u', 'w'],
+    'w': ['vv', 'v'],
+    'x': ['z', 'k'],
+    'y': ['i', 'v'],
+    'z': ['s', '2', 'x']
 }
 
 NUMERAL = [
@@ -48,37 +48,87 @@ NUMERAL = [
     ["9", "nine", "ninth"]
 ]
 
-ALGO_NAME_LIST = [
-    "omission", "repetition", "changeOrder", "replacement", "doubleReplacement", 
-    "addition", "missingDot", "stripDash", "vowelSwap", "addDash", "homoglyph", 
-    "commonMisspelling", "homophones", "wrongTld", "addTld", "subdomain", 
-    "singularPluralize", "changeDotDash", "wrongSld", "numeralSwap", "addDynamicDns"
+# Common algorithms that apply to both npm and pypi package names
+COMMON_ALGO_LIST = [
+    "omission", "repetition", "changeOrder", "replacement", "doubleReplacement",
+    "addition", "stripDash", "vowelSwap", "addDash", "homoglyph",
+    "commonMisspelling", "homophones", "singularPluralize", "numeralSwap"
 ]
 
-EXCLUDED_TLD = ["gov.pl"] # why not ?
+# npm-specific algorithms
+NPM_ALGO_LIST = [
+    "npmSuffix", "npmPrefix", "npmScopeSquat", "npmSeparator"
+]
+
+# pypi-specific algorithms
+PYPI_ALGO_LIST = [
+    "pypiSuffix", "pypiPrefix", "pypiSeparator", "pypiVersionSuffix"
+]
+
+# npm ecosystem-specific suffixes commonly seen in package names
+NPM_SUFFIXES = ["-js", "-node", "-ts", "-react", "-ng", "-vue", "-cli", "-lib", "-utils", "-api"]
+
+# npm ecosystem-specific prefixes commonly seen in package names
+NPM_PREFIXES = ["js-", "node-", "ts-", "react-", "ng-", "vue-", "cli-", "lib-"]
+
+# Common npm scopes that could be typosquatted
+NPM_COMMON_SCOPES = [
+    "@types", "@babel", "@angular", "@vue", "@react", "@aws-sdk",
+    "@google-cloud", "@azure", "@nestjs", "@emotion", "@mui",
+    "@testing-library", "@typescript-eslint", "@eslint"
+]
+
+# pypi ecosystem-specific suffixes commonly seen in package names
+PYPI_SUFFIXES = ["-py", "-python", "-lib", "-sdk", "-api", "-client", "-core", "-utils"]
+
+# pypi ecosystem-specific prefixes commonly seen in package names
+PYPI_PREFIXES = ["py-", "python-", "lib-", "py"]
+
+# pypi version suffixes for version confusion attacks
+PYPI_VERSION_SUFFIXES = ["2", "3", "-v2", "-v3", "4"]
 
 
 # Getters for constants
 def const_get_similar_chars():
-    """
-    Return the dictionary of similar characters
-    """
+    """Return the dictionary of similar characters"""
     return SIMILAR_CHAR
 
 def const_get_numeral():
-    """
-    Return the list of numeral
-    """
+    """Return the list of numeral"""
     return NUMERAL
 
-def const_get_algo_name_list():
-    """
-    Return the list of algorithm names
-    """
-    return ALGO_NAME_LIST
+def const_get_common_algo_list():
+    """Return the list of common algorithm names"""
+    return COMMON_ALGO_LIST
 
-def const_get_excluded_tld():
-    """
-    Return the list of excluded TLD
-    """
-    return EXCLUDED_TLD
+def const_get_npm_algo_list():
+    """Return the list of npm-specific algorithm names"""
+    return NPM_ALGO_LIST
+
+def const_get_pypi_algo_list():
+    """Return the list of pypi-specific algorithm names"""
+    return PYPI_ALGO_LIST
+
+def const_get_npm_suffixes():
+    """Return npm-specific suffixes"""
+    return NPM_SUFFIXES
+
+def const_get_npm_prefixes():
+    """Return npm-specific prefixes"""
+    return NPM_PREFIXES
+
+def const_get_npm_common_scopes():
+    """Return common npm scopes"""
+    return NPM_COMMON_SCOPES
+
+def const_get_pypi_suffixes():
+    """Return pypi-specific suffixes"""
+    return PYPI_SUFFIXES
+
+def const_get_pypi_prefixes():
+    """Return pypi-specific prefixes"""
+    return PYPI_PREFIXES
+
+def const_get_pypi_version_suffixes():
+    """Return pypi version suffixes"""
+    return PYPI_VERSION_SUFFIXES

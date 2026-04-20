@@ -9,8 +9,8 @@ import json
 pathEtc = get_path_etc()
 
 
-def commonMisspelling(domain, resultList, verbose, limit, givevariations=False,  keeporiginal=False, combo=False):
-    """Change a word by is misspellings"""
+def commonMisspelling(package, resultList, verbose, limit, givevariations=False, keeporiginal=False, combo=False):
+    """Change a word by its misspellings"""
     # https://en.wikipedia.org/wiki/Wikipedia:Lists_of_common_misspellings/For_machines
 
     if not len(resultList) >= limit:
@@ -21,37 +21,41 @@ def commonMisspelling(domain, resultList, verbose, limit, givevariations=False, 
             misspelling = json.load(read_json)
             keys = misspelling.keys()
 
-        prefix, domain_without_tld, tld = parse_domain(domain)
-        domainList = [domain_without_tld]
-
         resultLoc = list()
-        loclist = list()
+        name = package
 
-        for name in domainList:
-            if name in keys:
-                misspell = misspelling[name].split(",")
-                for mis in misspell:
-                    if prefix + mis.replace(" ","") not in resultLoc:
-                        resultLoc.append(prefix + mis.replace(" ",""))
-            elif name not in resultLoc:
-                resultLoc.append(prefix + name)
+        # Split on separators to find words to check for misspellings
+        # Try the full name first
+        if name in keys:
+            misspell = misspelling[name].split(",")
+            for mis in misspell:
+                variation = mis.replace(" ", "")
+                if variation != name and variation not in resultLoc:
+                    resultLoc.append(variation)
 
-            if resultLoc:
-                loclist.append(resultLoc)
-                resultLoc = list()
-
-        loclist.append([tld])
-        rLoc = globalAppend(loclist)
+        # Also try individual parts split by common separators
+        for sep in ['-', '_', '.']:
+            if sep in name:
+                parts = name.split(sep)
+                for idx, part in enumerate(parts):
+                    if part in keys:
+                        misspell = misspelling[part].split(",")
+                        for mis in misspell:
+                            new_parts = parts.copy()
+                            new_parts[idx] = mis.replace(" ", "")
+                            variation = sep.join(new_parts)
+                            if variation != name and variation not in resultLoc:
+                                resultLoc.append(variation)
 
         if verbose:
-            print(f"{len(rLoc)}\n")
+            print(f"{len(resultLoc)}\n")
 
         if combo:
-            rLoc = checkResult(rLoc, resultList, givevariations, "commonMisspelling")
-            rLoc = final_treatment(domain, rLoc, limit, givevariations, keeporiginal, "commonMisspelling")
+            rLoc = checkResult(resultLoc, resultList, givevariations, "commonMisspelling")
+            rLoc = final_treatment(package, rLoc, limit, givevariations, keeporiginal, "commonMisspelling")
             return rLoc
 
-        resultList = checkResult(rLoc, resultList, givevariations, "commonMisspelling")
-        resultList = final_treatment(domain, resultList, limit, givevariations, keeporiginal, "commonMisspelling")
+        resultList = checkResult(resultLoc, resultList, givevariations, "commonMisspelling")
+        resultList = final_treatment(package, resultList, limit, givevariations, keeporiginal, "commonMisspelling")
 
     return resultList
