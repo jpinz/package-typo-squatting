@@ -8,7 +8,7 @@ pathProg = pathlib.Path(__file__).parent.absolute()
 pathWork = ""
 for i in str(pathProg).replace("\\", "/").split("/")[:-1]:
     pathWork += i + "/"
-pathBin = os.path.join(pathWork, "ail_typo_squatting")
+pathBin = os.path.join(pathWork, "pkg_typo_squatting")
 sys.path.append(pathBin)
 
 from typo import runAll, omission, repetition, replacement, addition, changeOrder

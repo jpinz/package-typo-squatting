@@ -1,16 +1,15 @@
 [tool.poetry]
-name = "ail-typo-squatting"
-version = "3.0.0"
+name = "pkg-typo-squatting"
+version = "1.0.0"
 description = "Generate typosquatting variations for npm and PyPI package names"
 authors = [
-	"David Cruciani <david.cruciani@circl.lu>"
+	"Julian Pinzer <jupinzer@microsoft.com>"
 ]
 maintainers = [
-	"Alexandre Dulaunoy <a@foo.be>",
-	"Aurelien Thirion (terrtia) <aurelien.thirion@circl.lu>"
+	"Julian Pinzer <jupinzer@microsoft.com>"
 ]
 license = "BSD-2-Clause"
-repository = "https://github.com/typosquatter/ail-typo-squatting"
+repository = "https://github.com/jpinz/package-typo-squatting"
 
 readme = "README.md"
 
@@ -33,7 +32,7 @@ retrie = "^0.2.4"
 [tool.poetry.dev-dependencies]
 
 [tool.poetry.scripts]
-ail-typo-squatting = "ail_typo_squatting.typo:main"
+pkg-typo-squatting = "pkg_typo_squatting.typo:main"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

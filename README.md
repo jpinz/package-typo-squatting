@@ -1,6 +1,6 @@
-# ail-typo-squatting
+# pkg-typo-squatting
 
-ail-typo-squatting is a Python library to generate potential typosquatting package names for **npm** and **PyPI** ecosystems. It uses various name permutation techniques to detect potential supply chain attacks through package name confusion.
+pkg-typo-squatting is a Python library to generate potential typosquatting package names for **npm** and **PyPI** ecosystems. It uses various name permutation techniques to detect potential supply chain attacks through package name confusion.
 
 The tool supports two separate systems with ecosystem-specific techniques:
 - **npm packages**: Includes scope/namespace squatting, JS/Node-specific suffixes and prefixes
@@ -16,19 +16,19 @@ The tool supports two separate systems with ecosystem-specific techniques:
 
 ## Source install
 
-ail-typo-squatting can be installed with poetry. If you don't have poetry installed, you can do the following `curl -sSL https://install.python-poetry.org | python3 -`.
+pkg-typo-squatting can be installed with poetry. If you don't have poetry installed, you can do the following `curl -sSL https://install.python-poetry.org | python3 -`.
 
 ```bash
 $ poetry install
 $ poetry shell
-$ cd ail-typo-squatting
+$ cd pkg-typo-squatting
 $ python typo.py -h
 ```
 
 ## pip installation
 
 ```bash
-$ pip3 install ail-typo-squatting
+$ pip3 install pkg-typo-squatting
 ```
 
 # Usage
@@ -93,7 +93,7 @@ $ python3 typo.py -fpn packages.txt -e pypi -a -o .
 ## Run all algorithms for an ecosystem
 
 ```python
-from ail_typo_squatting import runAll
+from pkg_typo_squatting import runAll
 import math
 
 resultList = runAll(
@@ -112,7 +112,7 @@ for variation in resultList[:10]:
 ## Run specific algorithms
 
 ```python
-from ail_typo_squatting import omission, npmSuffix, npmScopeSquat
+from pkg_typo_squatting import omission, npmSuffix, npmScopeSquat
 import math
 
 resultList = list()
@@ -134,7 +134,7 @@ print(resultList)
 ## PyPI example
 
 ```python
-from ail_typo_squatting import omission, pypiSuffix, pypiPrefix, pypiVersionSuffix
+from pkg_typo_squatting import omission, pypiSuffix, pypiPrefix, pypiVersionSuffix
 import math
 
 resultList = list()
