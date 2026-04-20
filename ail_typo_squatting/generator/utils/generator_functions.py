@@ -62,13 +62,18 @@ def final_treatment(package, resultList, limit, givevariations, keeporiginal, al
                 resultList.remove(package)
         except:
             pass
-    elif givevariations:
-        try:
-            resultList.remove([package, algo_name])
-        except:
-            pass
-        if not [package, 'original'] in resultList:
-            resultList.insert(0, [package, 'original'])
+    else:
+        if givevariations:
+            try:
+                resultList.remove([package, algo_name])
+            except:
+                pass
+            if not [package, 'original'] in resultList:
+                resultList.insert(0, [package, 'original'])
+        else:
+            # Keep the original package name at the beginning
+            if package not in resultList:
+                resultList.insert(0, package)
 
     while len(resultList) > limit:
         resultList.pop()
