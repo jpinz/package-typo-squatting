@@ -7,61 +7,66 @@ pathEtc = get_path_etc()
 
 """
 
-   Original Domain        Typosquatted Domain
+   Original Package        Typosquatted Package
   +----------------+     +-----------------+
-  |    circl.lu    |     |     sircl.lu    |
+  |    base        |     |     bass        |
   +----------------+     +-----------------+
 
 """
 
 # Homophones
-def homophones(domain, resultList, verbose, limit, givevariations=False,  keeporiginal=False, combo=False):
-    """Change word by an other who sound the same when spoken"""
+def homophones(package, resultList, verbose, limit, givevariations=False, keeporiginal=False, combo=False):
+    """Change word by another that sounds the same when spoken"""
     # From http://en.wikipedia.org/wiki/Wikipedia:Lists_of_common_misspellings/Homophones
-    # Last updated 04/2020
-    # cat /tmp/h | sed 's/^[ ]*//g' | egrep -v "These pairs become homophones in certain dialects only|^Names" | sed -E 's/ (and|or) /,/g' | sed 's/\//,/g' | sed 's/,,/,/g' | tr '[:upper:]' '[:lower:]' | tr -d " '" | grep -v "^$"
 
     if not len(resultList) >= limit:
         if verbose:
             print("[+] Homophones")
 
         with open(os.path.join(pathEtc, "homophones.txt"), "r") as read_file:
-            homophones = read_file.readlines()
-        
-        prefix, domain_without_tld, tld = parse_domain(domain)
-        domainList = [domain_without_tld]
+            homophones_list = read_file.readlines()
 
         resultLoc = list()
-        loclist = list()
+        name = package
 
-        for name in domainList:
-            for lines in homophones:
-                line = lines.split(",")
-                for word in line:
-                    if name == word.rstrip("\n"):
-                        for otherword in line:
-                            if prefix + otherword.rstrip("\n") not in resultLoc and otherword.rstrip("\n") != name:
-                                resultLoc.append(prefix + otherword.rstrip("\n"))
-                    elif name not in resultLoc:
-                        resultLoc.append(prefix + name)
+        # Check the full name against homophones
+        for lines in homophones_list:
+            line = lines.split(",")
+            for word in line:
+                if name == word.rstrip("\n"):
+                    for otherword in line:
+                        cleaned = otherword.rstrip("\n")
+                        if cleaned != name and cleaned not in resultLoc:
+                            resultLoc.append(cleaned)
 
-            if resultLoc:
-                loclist.append(resultLoc)
-                resultLoc = list()
-
-        loclist.append([tld])
-        rLoc = globalAppend(loclist)
+        # Also check individual parts split by common separators
+        for sep in ['-', '_', '.']:
+            if sep in name:
+                parts = name.split(sep)
+                for idx, part in enumerate(parts):
+                    for lines in homophones_list:
+                        line = lines.split(",")
+                        for word in line:
+                            if part == word.rstrip("\n"):
+                                for otherword in line:
+                                    cleaned = otherword.rstrip("\n")
+                                    if cleaned != part:
+                                        new_parts = parts.copy()
+                                        new_parts[idx] = cleaned
+                                        variation = sep.join(new_parts)
+                                        if variation != name and variation not in resultLoc:
+                                            resultLoc.append(variation)
 
         if verbose:
-            print(f"{len(rLoc)}\n")
+            print(f"{len(resultLoc)}\n")
 
         if combo:
-            rLoc = checkResult(rLoc, resultList, givevariations, "homophones")
-            rLoc = final_treatment(domain, rLoc, limit, givevariations, keeporiginal, "homophones")
+            rLoc = checkResult(resultLoc, resultList, givevariations, "homophones")
+            rLoc = final_treatment(package, rLoc, limit, givevariations, keeporiginal, "homophones")
             return rLoc
 
-        resultList = checkResult(rLoc, resultList, givevariations, "homophones")
-        resultList = final_treatment(domain, resultList, limit, givevariations, keeporiginal, "homophones")
+        resultList = checkResult(resultLoc, resultList, givevariations, "homophones")
+        resultList = final_treatment(package, resultList, limit, givevariations, keeporiginal, "homophones")
 
     return resultList
  

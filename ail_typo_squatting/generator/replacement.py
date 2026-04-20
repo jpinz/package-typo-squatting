@@ -3,52 +3,41 @@ from .utils.generator_functions import *
 
 """
 
-   Original Domain        Typosquatted Domain
+   Original Package        Typosquatted Package
   +----------------+     +----------------------+
-  |    circl.lu    |     |      corcl.lu        |
+  |    lodash      |     |      lodask          |
   +----------------+     +----------------------+
 
 """
 
 # Replacement
-def replacement(domain, resultList, verbose, limit, givevariations=False,  keeporiginal=False, combo=False):
-    """Adjacent character replacement to the immediate left and right on the keyboard"""
+def replacement(package, resultList, verbose, limit, givevariations=False, keeporiginal=False, combo=False):
+    """Character replacement with a-z and 0-9"""
 
     if not len(resultList) >= limit:
         if verbose:
             print("[+] Replacement")
 
         resultLoc = list()
-        loclist = list()
+        name = package
 
-        prefix, domain_without_tld, tld = parse_domain(domain)
-        domainList = [domain_without_tld]
-
-        for name in domainList:
-            for i in (*range(48, 58), *range(97, 123)):
-                for j in range(0, len(name)):
-                    pre = name[:j]
-                    suf = name[j+1:]
-                    variation = prefix + pre + chr(i) + suf
-                    if variation not in resultLoc:
-                        resultLoc.append(variation)
-
-            if resultLoc:
-                loclist.append(resultLoc)
-                resultLoc = list()
-
-        loclist.append([tld])
-        rLoc = globalAppend(loclist)
+        for i in (*range(48, 58), *range(97, 123)):
+            for j in range(0, len(name)):
+                pre = name[:j]
+                suf = name[j+1:]
+                variation = pre + chr(i) + suf
+                if variation != name and variation not in resultLoc:
+                    resultLoc.append(variation)
 
         if verbose:
-            print(f"{len(rLoc)}\n")
+            print(f"{len(resultLoc)}\n")
 
         if combo:
-            rLoc = checkResult(rLoc, resultList, givevariations, 'replacement')
-            rLoc = final_treatment(domain, rLoc, limit, givevariations, keeporiginal, "replacement")
+            rLoc = checkResult(resultLoc, resultList, givevariations, 'replacement')
+            rLoc = final_treatment(package, rLoc, limit, givevariations, keeporiginal, "replacement")
             return rLoc
 
-        resultList = checkResult(rLoc, resultList, givevariations, 'replacement')
-        resultList = final_treatment(domain, resultList, limit, givevariations, keeporiginal, "replacement")
+        resultList = checkResult(resultLoc, resultList, givevariations, 'replacement')
+        resultList = final_treatment(package, resultList, limit, givevariations, keeporiginal, "replacement")
 
     return resultList

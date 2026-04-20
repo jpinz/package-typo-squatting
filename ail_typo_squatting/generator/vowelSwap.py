@@ -3,54 +3,41 @@ from .utils.generator_functions import *
 
 """
 
-   Original Domain        Typosquatted Domain
+   Original Package        Typosquatted Package
   +----------------+     +----------------------+
-  |    circl.lu    |     |    corcl.li          |
+  |    lodash      |     |    ledash            |
   +----------------+     +----------------------+
 
 """
 
 # Vowel Swap
-def vowelSwap(domain, resultList, verbose, limit, givevariations=False,  keeporiginal=False, combo=False):
-    """Swap vowels within the domain name"""
+def vowelSwap(package, resultList, verbose, limit, givevariations=False, keeporiginal=False, combo=False):
+    """Swap vowels within the package name"""
 
     if not len(resultList) >= limit:
         if verbose:
             print("[+] Vowel Swap")
 
         resultLoc = list()
-        loclist = list()
-        # vowels = 'aeiouy'
         vowels = ["a", "e", "i", "o", "u", "y"]
+        name = package
 
-        prefix, domain_without_tld, tld = parse_domain(domain)
-        domainList = [domain_without_tld]
-
-        for name in domainList:
-            for j in vowels:
-                for k in vowels:
-                    if j != k:
-                        loc = prefix + name.replace(k, j)
-                        if loc not in resultLoc:
-                            resultLoc.append(loc)
-
-            if resultLoc:
-                loclist.append(resultLoc)
-                resultLoc = list()
-
-        loclist.append([tld])
-        rLoc = globalAppend(loclist)
+        for j in vowels:
+            for k in vowels:
+                if j != k:
+                    loc = name.replace(k, j)
+                    if loc != name and loc not in resultLoc:
+                        resultLoc.append(loc)
 
         if verbose:
-            print(f"{len(rLoc)}\n")
+            print(f"{len(resultLoc)}\n")
 
         if combo:
-            rLoc = checkResult(rLoc, resultList, givevariations, "vowelSwap")
-            rLoc = final_treatment(domain, rLoc, limit, givevariations, keeporiginal, "vowelSwap")
+            rLoc = checkResult(resultLoc, resultList, givevariations, "vowelSwap")
+            rLoc = final_treatment(package, rLoc, limit, givevariations, keeporiginal, "vowelSwap")
             return rLoc
 
-        resultList = checkResult(rLoc, resultList, givevariations, "vowelSwap")
-        resultList = final_treatment(domain, resultList, limit, givevariations, keeporiginal, "vowelSwap")
+        resultList = checkResult(resultLoc, resultList, givevariations, "vowelSwap")
+        resultList = final_treatment(package, resultList, limit, givevariations, keeporiginal, "vowelSwap")
 
     return resultList
-

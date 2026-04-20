@@ -3,62 +3,50 @@ from .utils.generator_functions import *
 
 """
 
-   Original Domain        Typosquatted Domain
+   Original Package        Typosquatted Package
   +----------------+     +----------------------+
-  |    circl.lu    |     |     circli.lu        |
+  |    lodash      |     |     lodasih          |
   +----------------+     +----------------------+
 
 """
 
 
 # Addition
-def addition(domain, resultList, verbose, limit, givevariations=False,  keeporiginal=False, combo=False):
-    """Add a character in the domain name"""
+def addition(package, resultList, verbose, limit, givevariations=False, keeporiginal=False, combo=False):
+    """Add a character in the package name"""
 
     if not len(resultList) >= limit:
         if verbose:
             print("[+] Addition")
 
         resultLoc = list()
-        loclist = list()
+        name = package
 
-        prefix, domain_without_tld, tld = parse_domain(domain)
-        domainList = [domain_without_tld]
+        for i in (*range(48, 58), *range(97, 123)):
+            # Adding 'i' in front of 'name'
+            variation = chr(i) + name
+            if variation not in resultLoc:
+                resultLoc.append(variation)
 
-        for name in domainList:
-            for i in (*range(48, 58), *range(97, 123)):
-                # Adding 'i' in front of 'name'
-                variation = prefix + chr(i) + name
-                if variation not in resultLoc:
+            # Adding 'i' at the end of 'name'
+            variation = name + chr(i)
+            if variation not in resultLoc:
+                resultLoc.append(variation)
+
+            for j in range(0, len(name)):
+                variation = name[:j] + chr(i) + name[j:]
+                if variation != name and variation not in resultLoc:
                     resultLoc.append(variation)
-
-                # Adding 'i' at the end of 'name'
-                variation = prefix + name + chr(i)
-                if variation not in resultLoc:
-                    resultLoc.append(variation)
-
-                for j in range(0, len(name)):
-                    variation = prefix + name[:j] + chr(i) + name[j:]
-                    if variation not in resultLoc:
-                        resultLoc.append(variation)
-
-            if resultLoc:
-                loclist.append(resultLoc)
-                resultLoc = list()
-
-        loclist.append([tld])
-
-        rLoc = globalAppend(loclist)
 
         if verbose:
-            print(f"{len(rLoc)}\n")
+            print(f"{len(resultLoc)}\n")
 
         if combo:
-            rLoc = checkResult(rLoc, resultList, givevariations, 'addition')
-            rLoc = final_treatment(domain, rLoc, limit, givevariations, keeporiginal, "addition")
+            rLoc = checkResult(resultLoc, resultList, givevariations, 'addition')
+            rLoc = final_treatment(package, rLoc, limit, givevariations, keeporiginal, "addition")
             return rLoc
 
-        resultList = checkResult(rLoc, resultList, givevariations, 'addition')
-        resultList = final_treatment(domain, resultList, limit, givevariations, keeporiginal, "addition")
+        resultList = checkResult(resultLoc, resultList, givevariations, 'addition')
+        resultList = final_treatment(package, resultList, limit, givevariations, keeporiginal, "addition")
 
     return resultList

@@ -6,15 +6,15 @@ numerals = const_get_numeral()
 
 """
 
-   Original Domain        Typosquatted Domain
+   Original Package        Typosquatted Package
   +----------------+     +--------------------+
-  |    circl.lu    |     |      c1rcl.lu      |
+  |    babel7      |     |      babel-seven   |
   +----------------+     +--------------------+
 
 """
 
 # Numeral Swap
-def numeralSwap(domain, resultList, verbose, limit, givevariations=False,  keeporiginal=False, combo=False):
+def numeralSwap(package, resultList, verbose, limit, givevariations=False, keeporiginal=False, combo=False):
     """Change a numbers to words and vice versa"""
 
     if not len(resultList) >= limit:
@@ -22,40 +22,29 @@ def numeralSwap(domain, resultList, verbose, limit, givevariations=False,  keepo
             print("[+] Numeral Swap")
 
         resultLoc = list()
-        loclist = list()
+        name = package
 
-        prefix, domain_without_tld, tld = parse_domain(domain)
-        domainList = [domain_without_tld]
+        for numerals_list in numerals:
+            for nume in numerals_list:
+                if nume in name:
+                    for nume2 in numerals_list:
+                        if not nume2 == nume:
+                            loc = name.replace(nume, nume2)
+                            if loc != name and loc not in resultLoc:
+                                resultLoc.append(loc)
 
-        for name in domainList:
-            for numerals_list in numerals:
-                for nume in numerals_list:
-                    if nume in name:
-                        for nume2 in numerals_list:
-                            if not nume2 == nume:
-                                loc = prefix + name.replace(nume, nume2)
-                                if not loc in resultLoc:
-                                    resultLoc.append(loc)
-            if resultLoc:
-                loclist.append(resultLoc)
-                resultLoc = list()
-
-        if loclist:
-            loclist.append([tld])
-            rLoc = globalAppend(loclist)
-
+        if resultLoc:
             if verbose:
-                print(f"{len(rLoc)}\n")
+                print(f"{len(resultLoc)}\n")
 
             if combo:
-                rLoc = checkResult(rLoc, resultList, givevariations, "numeralSwap")
-                rLoc = final_treatment(domain, rLoc, limit, givevariations, keeporiginal, "numeralSwap")
+                rLoc = checkResult(resultLoc, resultList, givevariations, "numeralSwap")
+                rLoc = final_treatment(package, rLoc, limit, givevariations, keeporiginal, "numeralSwap")
                 return rLoc
 
-            resultList = checkResult(rLoc, resultList, givevariations, "numeralSwap")
-            resultList = final_treatment(domain, resultList, limit, givevariations, keeporiginal, "numeralSwap")
+            resultList = checkResult(resultLoc, resultList, givevariations, "numeralSwap")
+            resultList = final_treatment(package, resultList, limit, givevariations, keeporiginal, "numeralSwap")
         elif verbose:
             print("0\n")
-
 
     return resultList

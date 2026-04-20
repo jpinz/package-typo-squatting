@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "ail-typo-squatting"
-version = "2.7.6"
-description = "Generate list of domain name using Domain name permutation engine to feed AIL"
+version = "3.0.0"
+description = "Generate typosquatting variations for npm and PyPI package names"
 authors = [
 	"David Cruciani <david.cruciani@circl.lu>"
 ]
@@ -16,7 +16,10 @@ readme = "README.md"
 
 keywords = [
 	"typo-squatting",
-	"typosquatting"
+	"typosquatting",
+	"npm",
+	"pypi",
+	"supply-chain"
 ]
 
 include = ["etc/*"]
@@ -24,10 +27,7 @@ include = ["etc/*"]
 [tool.poetry.dependencies]
 python = "^3.8"
 inflect = "^5.6.2"
-dnspython = "^2.4.2"
 pyyaml = "^6.0.1"
-tldextract = "^5.1.1"
-requests = "^2.31.0"
 retrie = "^0.2.4"
 
 [tool.poetry.dev-dependencies]
