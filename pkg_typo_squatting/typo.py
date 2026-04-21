@@ -11,16 +11,44 @@ sys.path.append(str(os.path.join(pathlib.Path(__file__).parent)))
 ## The local libraries
 ## The format function
 from format.output import formatOutput
+from generator.addDash import addDash  # noqa: F401
+from generator.addition import addition  # noqa: F401
+from generator.changeOrder import changeOrder  # noqa: F401
+from generator.closeLetters import closeLetters  # noqa: F401
+from generator.commonMisspelling import commonMisspelling  # noqa: F401
 
 ## The common typo generators
 from generator.const.main import *
+from generator.doubleHit import doubleHit  # noqa: F401
+from generator.doubleReplacement import doubleReplacement  # noqa: F401
+from generator.homoglyph import homoglyph  # noqa: F401
+from generator.homophones import homophones  # noqa: F401
+from generator.npm.prefix import npmPrefix  # noqa: F401
+from generator.npm.scope import npmScopeSquat  # noqa: F401
+from generator.npm.separator import npmSeparator  # noqa: F401
+from generator.npm.substitution import npmSubstitution  # noqa: F401
 
 ## npm-specific generators
+from generator.npm.suffix import npmSuffix  # noqa: F401
+from generator.numeralSwap import numeralSwap  # noqa: F401
+from generator.omission import omission  # noqa: F401
+from generator.pypi.prefix import pypiPrefix  # noqa: F401
+from generator.pypi.separator import pypiSeparator  # noqa: F401
+from generator.pypi.substitution import pypiSubstitution  # noqa: F401
+
 ## pypi-specific generators
+from generator.pypi.suffix import pypiSuffix  # noqa: F401
+from generator.pypi.version_suffix import pypiVersionSuffix  # noqa: F401
+from generator.removeSeparatedSection import removeSeparatedSection  # noqa: F401
+from generator.repetition import repetition  # noqa: F401
+from generator.replacement import replacement  # noqa: F401
+from generator.singularPluralize import singularPluralize  # noqa: F401
+from generator.stripDash import stripDash  # noqa: F401
 from generator.utils.generator_functions import (
     parse_package_name,
     reassemble_package_name,
 )
+from generator.vowelSwap import vowelSwap  # noqa: F401
 
 ## The utils
 from utils.parser import getArguments

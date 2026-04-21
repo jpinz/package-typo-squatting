@@ -131,6 +131,24 @@ def getArguments():
         help="Change numbers to words and vice versa",
         action="store_true",
     )
+    parser.add_argument(
+        "-cl",
+        "--closeletters",
+        help="Replace characters with QWERTY keyboard neighbors",
+        action="store_true",
+    )
+    parser.add_argument(
+        "-dh",
+        "--doublehit",
+        help="Insert a QWERTY keyboard neighbor next to each character",
+        action="store_true",
+    )
+    parser.add_argument(
+        "-rss",
+        "--removeseparatedsection",
+        help="Remove one section from a separated package name",
+        action="store_true",
+    )
 
     # npm-specific algorithms
     parser.add_argument(

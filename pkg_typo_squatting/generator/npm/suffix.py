@@ -1,8 +1,14 @@
-from ..const.main import const_get_npm_abbrev_swaps, const_get_npm_suffixes
+from ..const.main import (
+    const_get_affix_separators,
+    const_get_common_abbrev_swaps,
+    const_get_npm_abbrev_swaps,
+    const_get_npm_affixes,
+)
 from ..utils.generator_functions import *
 
-NPM_SUFFIXES = const_get_npm_suffixes()
-NPM_ABBREV_SWAPS = const_get_npm_abbrev_swaps()
+NPM_AFFIXES = const_get_npm_affixes()
+ABBREV_SWAPS = const_get_common_abbrev_swaps() + const_get_npm_abbrev_swaps()
+AFFIX_SEPARATORS = const_get_affix_separators()
 
 """
 
@@ -23,7 +29,7 @@ def npmSuffix(
     keeporiginal=False,
     combo=False,
 ):
-    """Add common npm ecosystem suffixes like -js, -node, -ts to the package name"""
+    """Add common npm ecosystem suffixes like -js, .js, js to the package name"""
 
     if not len(resultList) >= limit:
         if verbose:
@@ -32,31 +38,34 @@ def npmSuffix(
         resultLoc = list()
         name = package
 
-        for suffix in NPM_SUFFIXES:
-            # Don't add a suffix if the name already ends with it
-            if not name.endswith(suffix):
-                variation = name + suffix
-                if variation not in resultLoc:
-                    resultLoc.append(variation)
+        for affix in NPM_AFFIXES:
+            for sep in AFFIX_SEPARATORS:
+                suffix = sep + affix
+                # Don't add a suffix if the name already ends with it
+                if not name.endswith(suffix):
+                    variation = name + suffix
+                    if variation not in resultLoc:
+                        resultLoc.append(variation)
 
-            # Also try removing the suffix if the package already has it
-            if name.endswith(suffix):
-                variation = name[: -len(suffix)]
-                if variation and variation not in resultLoc:
-                    resultLoc.append(variation)
+                # Also try removing the suffix if the package already has it
+                if name.endswith(suffix):
+                    variation = name[: -len(suffix)]
+                    if variation and variation not in resultLoc:
+                        resultLoc.append(variation)
 
-        # Abbreviation swaps: e.g. express-js <-> express-javascript
-        for short, long in NPM_ABBREV_SWAPS:
-            short_suffix = "-" + short
-            long_suffix = "-" + long
-            if name.endswith(short_suffix):
-                variation = name[: -len(short_suffix)] + long_suffix
-                if variation not in resultLoc:
-                    resultLoc.append(variation)
-            if name.endswith(long_suffix):
-                variation = name[: -len(long_suffix)] + short_suffix
-                if variation not in resultLoc:
-                    resultLoc.append(variation)
+        # Abbreviation swaps across all separators
+        for short, long in ABBREV_SWAPS:
+            for sep in AFFIX_SEPARATORS:
+                short_suffix = sep + short
+                long_suffix = sep + long
+                if name.endswith(short_suffix):
+                    variation = name[: -len(short_suffix)] + long_suffix
+                    if variation != name and variation not in resultLoc:
+                        resultLoc.append(variation)
+                if name.endswith(long_suffix):
+                    variation = name[: -len(long_suffix)] + short_suffix
+                    if variation != name and variation not in resultLoc:
+                        resultLoc.append(variation)
 
         if verbose:
             print(f"{len(resultLoc)}\n")

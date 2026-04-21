@@ -37,6 +37,7 @@ usage: pkg-typo-squatting [-h] [-v] [-pn PACKAGENAME [PACKAGENAME ...]] [-fpn FI
                [-e {npm,pypi}] [-o OUTPUT] [-fo FORMATOUTPUT] [-br] [-l LIMIT]
                [-var] [-ko] [-a] [-om] [-repe] [-repl] [-drepl] [-cho] [-add]
                [-sd] [-vs] [-ada] [-hg] [-ahg] [-cm] [-hp] [-sp] [-ns]
+               [-cl] [-dh] [-rss]
                [--npmsuffix] [--npmprefix] [--npmscopesquat] [--npmseparator] [--npmsubstitution]
                [--pypisuffix] [--pypiprefix] [--pypiseparator] [--pypiversionsuffix] [--pypisubstitution]
                [-combo]
@@ -167,6 +168,9 @@ print(resultList)
 | Homophones | Replace with same-sounding words | (from homophone list) |
 | SingularPluralize | Toggle singular/plural | request → requests |
 | NumeralSwap | Swap numbers and words | babel7 → babelseven |
+| CloseLetters | Replace with QWERTY keyboard neighbor | lodash → kodash, lidash |
+| DoubleHit | Insert QWERTY neighbor next to character | lodash → klodash, lpodash |
+| RemoveSeparatedSection | Drop one section from separated name | foo-bar-js → bar-js, foo-js, foo-bar |
 
 ## npm-specific algorithms
 

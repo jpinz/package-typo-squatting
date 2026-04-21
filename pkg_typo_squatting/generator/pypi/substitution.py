@@ -1,7 +1,7 @@
-from ..const.main import const_get_pypi_abbrev_swaps
+from ..const.main import const_get_common_abbrev_swaps, const_get_pypi_abbrev_swaps
 from ..utils.generator_functions import *
 
-PYPI_ABBREV_SWAPS = const_get_pypi_abbrev_swaps()
+ABBREV_SWAPS = const_get_common_abbrev_swaps() + const_get_pypi_abbrev_swaps()
 
 """
 
@@ -35,7 +35,7 @@ def pypiSubstitution(
         resultLoc = list()
         name = package
 
-        for short, long in PYPI_ABBREV_SWAPS:
+        for short, long in ABBREV_SWAPS:
             if short in name:
                 variation = name.replace(short, long)
                 if variation != name and variation not in resultLoc:

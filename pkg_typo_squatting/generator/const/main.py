@@ -63,6 +63,9 @@ COMMON_ALGO_LIST = [
     "homophones",
     "singularPluralize",
     "numeralSwap",
+    "closeLetters",
+    "doubleHit",
+    "removeSeparatedSection",
 ]
 
 # npm-specific algorithms
@@ -83,45 +86,47 @@ PYPI_ALGO_LIST = [
     "pypiSubstitution",
 ]
 
-# npm ecosystem-specific suffixes commonly seen in package names
-NPM_SUFFIXES = [
-    "-js",
-    "-javascript",
-    "-node",
-    "-ts",
-    "-typescript",
-    "-react",
-    "-ng",
-    "-vue",
-    "-cli",
-    "-lib",
-    "-utils",
-    "-api",
-    "js",
-    ".js",
-    "javascript",
-    "ts",
-    ".ts",
-    "typescript",
-    "node",
+# Common affixes shared across both npm and PyPI ecosystems
+COMMON_AFFIXES = [
+    "lib",
+    "library",
+    "utils",
+    "util",
+    "utility",
+    "api",
+    "cli",
+    "config",
+    "cfg",
+    "helper",
+    "helpers",
+    "core",
+    "client",
+    "sdk",
 ]
 
-# npm ecosystem-specific prefixes commonly seen in package names
-NPM_PREFIXES = [
-    "js-",
-    "javascript-",
-    "node-",
-    "ts-",
-    "typescript-",
-    "react-",
-    "ng-",
-    "vue-",
-    "cli-",
-    "lib-",
+# Common abbreviation swap pairs (apply to both ecosystems)
+COMMON_ABBREV_SWAPS = [
+    ("lib", "library"),
+    ("util", "utils"),
+    ("util", "utility"),
+    ("utils", "utility"),
+    ("config", "cfg"),
+]
+
+# npm ecosystem-specific suffixes/prefixes (base terms, separators applied by generators)
+NPM_AFFIXES = [
     "js",
+    "javascript",
     "node",
     "ts",
+    "typescript",
+    "react",
+    "ng",
+    "vue",
 ]
+
+# Separators used when generating suffix/prefix variations
+AFFIX_SEPARATORS = ["-", ".", ""]
 
 # Abbreviation swap pairs for npm (short <-> long)
 NPM_ABBREV_SWAPS = [
@@ -129,41 +134,8 @@ NPM_ABBREV_SWAPS = [
     ("ts", "typescript"),
 ]
 
-# Common npm scopes that could be typosquatted
-NPM_COMMON_SCOPES = [
-    "@types",
-    "@babel",
-    "@angular",
-    "@vue",
-    "@react",
-    "@aws-sdk",
-    "@google-cloud",
-    "@azure",
-    "@nestjs",
-    "@emotion",
-    "@mui",
-    "@testing-library",
-    "@typescript-eslint",
-    "@eslint",
-]
-
-# pypi ecosystem-specific suffixes commonly seen in package names
-PYPI_SUFFIXES = [
-    "-py",
-    "-python",
-    "-lib",
-    "-sdk",
-    "-api",
-    "-client",
-    "-core",
-    "-utils",
-    "py",
-    ".py",
-    "python",
-]
-
-# pypi ecosystem-specific prefixes commonly seen in package names
-PYPI_PREFIXES = ["py-", "python-", "lib-", "py"]
+# pypi ecosystem-specific suffixes/prefixes (base terms, separators applied by generators)
+PYPI_AFFIXES = ["py", "python"]
 
 # Abbreviation swap pairs for pypi (short <-> long)
 PYPI_ABBREV_SWAPS = [
@@ -200,29 +172,24 @@ def const_get_pypi_algo_list():
     return PYPI_ALGO_LIST
 
 
-def const_get_npm_suffixes():
-    """Return npm-specific suffixes"""
-    return NPM_SUFFIXES
+def const_get_npm_affixes():
+    """Return npm base affix terms (common + npm-specific)"""
+    return COMMON_AFFIXES + NPM_AFFIXES
 
 
-def const_get_npm_prefixes():
-    """Return npm-specific prefixes"""
-    return NPM_PREFIXES
+def const_get_affix_separators():
+    """Return separators used for affix generation"""
+    return AFFIX_SEPARATORS
 
 
-def const_get_npm_common_scopes():
-    """Return common npm scopes"""
-    return NPM_COMMON_SCOPES
+def const_get_pypi_affixes():
+    """Return pypi base affix terms (common + pypi-specific)"""
+    return COMMON_AFFIXES + PYPI_AFFIXES
 
 
-def const_get_pypi_suffixes():
-    """Return pypi-specific suffixes"""
-    return PYPI_SUFFIXES
-
-
-def const_get_pypi_prefixes():
-    """Return pypi-specific prefixes"""
-    return PYPI_PREFIXES
+def const_get_common_abbrev_swaps():
+    """Return common abbreviation swap pairs"""
+    return COMMON_ABBREV_SWAPS
 
 
 def const_get_pypi_version_suffixes():
