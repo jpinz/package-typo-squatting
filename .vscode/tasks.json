@@ -35,6 +35,13 @@
 			"command": "uv run ruff check .",
 			"group": "build",
 			"problemMatcher": []
+		},
+		{
+			"label": "Generate: training data (CSV)",
+			"type": "shell",
+			"command": "uv run pkg-typo-squatting -fpn ${input:trainingInput} -e ${input:ecosystem} -a --training --training-format csv -o ${input:trainingOutput}",
+			"group": "build",
+			"problemMatcher": []
 		}
 	],
 	"inputs": [
@@ -50,6 +57,18 @@
 			"type": "pickString",
 			"options": ["npm", "pypi"],
 			"default": "npm"
+		},
+		{
+			"id": "trainingInput",
+			"description": "Path to file with package names (one per line)",
+			"type": "promptString",
+			"default": "packages.json"
+		},
+		{
+			"id": "trainingOutput",
+			"description": "Output file path for training data",
+			"type": "promptString",
+			"default": "training_data.csv"
 		}
 	]
 }

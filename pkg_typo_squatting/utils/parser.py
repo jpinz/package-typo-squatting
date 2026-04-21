@@ -208,4 +208,25 @@ def getArguments():
         "-combo", help="Combine multiple algo on a package name", action="store_true"
     )
 
+    parser.add_argument(
+        "-w",
+        "--workers",
+        type=int,
+        default=None,
+        help="number of parallel workers (default: number of CPU cores)",
+    )
+
+    # Training data generation
+    parser.add_argument(
+        "--training",
+        help="Generate training data for embedding models (CSV or JSON with anchor/positive/technique columns)",
+        action="store_true",
+    )
+    parser.add_argument(
+        "--training-format",
+        choices=["csv", "json"],
+        default="csv",
+        help="Format for training data output: csv or json (default: csv)",
+    )
+
     return parser

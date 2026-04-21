@@ -1,16 +1,23 @@
 # Import all the modules
 
 ## The public libraries
+import json
 import math
 import os
 import pathlib
 import sys
+import threading
+from concurrent.futures import ProcessPoolExecutor, as_completed
+from multiprocessing import Manager
+
+from tqdm import tqdm
 
 sys.path.append(str(os.path.join(pathlib.Path(__file__).parent)))
 
 ## The local libraries
 ## The format function
 from format.output import formatOutput
+from format.training import appendTrainingData, formatTrainingData
 from generator.addDash import addDash  # noqa: F401
 from generator.addition import addition  # noqa: F401
 from generator.changeOrder import changeOrder  # noqa: F401
@@ -79,6 +86,7 @@ def runAll(
     givevariations=False,
     keeporiginal=False,
     all_homoglyph=False,
+    progress_queue=None,
 ):
     """Run all algorithms for the given ecosystem on the package name.
 
@@ -100,13 +108,28 @@ def runAll(
     # For npm scoped packages, run common generators on the name part
     scope, name = parse_package_name(package, ecosystem)
 
-    for algo in algo_list:
+    algo_iter = algo_list
+    if verbose:
+        algo_iter = tqdm(
+            algo_list,
+            desc=package,
+            unit="algo",
+            leave=False,
+            file=sys.stderr,
+        )
+
+    for algo in algo_iter:
+        if verbose:
+            algo_iter.set_postfix_str(algo)
+        if progress_queue is not None:
+            progress_queue.put((package, "algo_start", algo))
+
         func = globals()[algo]
         if algo in common_algo_list and scope:
             # For scoped npm packages, run common algos on name part, then reassemble
             name_results = list()
             name_results = func(
-                name, name_results, verbose, limit, givevariations, keeporiginal
+                name, name_results, False, limit, givevariations, keeporiginal
             )
 
             # Reassemble with scope
@@ -129,7 +152,7 @@ def runAll(
                     name_results = func(
                         name,
                         name_results,
-                        verbose,
+                        False,
                         limit,
                         givevariations,
                         keeporiginal,
@@ -151,7 +174,7 @@ def runAll(
                     resultList = func(
                         package,
                         resultList,
-                        verbose,
+                        False,
                         limit,
                         givevariations,
                         keeporiginal,
@@ -159,11 +182,14 @@ def runAll(
                     )
             else:
                 resultList = func(
-                    package, resultList, verbose, limit, givevariations, keeporiginal
+                    package, resultList, False, limit, givevariations, keeporiginal
                 )
 
+        if progress_queue is not None:
+            progress_queue.put((package, "algo_done", algo))
+
     if verbose:
-        print(f"Total: {len(resultList)}")
+        tqdm.write(f"Total: {len(resultList)}", file=sys.stderr)
 
     if formatoutput and pathOutput:
         formatOutput(formatoutput, resultList, package, pathOutput, givevariations)
@@ -171,18 +197,189 @@ def runAll(
     return resultList
 
 
+def _run_package(
+    package,
+    ecosystem,
+    limit,
+    givevariations,
+    keeporiginal,
+    all_homoglyph,
+    mode,
+    selected_algos,
+    progress_queue=None,
+):
+    """Process a single package. Designed to run in a worker process."""
+    package = package.strip()
+    if not package:
+        return (package, [])
+
+    if mode == "all":
+        algo_count = len(get_algo_list(ecosystem))
+    else:
+        algo_count = len(selected_algos)
+
+    if progress_queue is not None:
+        progress_queue.put((package, "start", algo_count))
+
+    resultList = list()
+
+    if mode == "all":
+        resultList = runAll(
+            package=package,
+            ecosystem=ecosystem,
+            limit=limit,
+            verbose=False,
+            givevariations=givevariations,
+            keeporiginal=keeporiginal,
+            all_homoglyph=all_homoglyph,
+            progress_queue=progress_queue,
+        )
+    elif mode == "combo":
+        base_result = list()
+        for algo in selected_algos:
+            if progress_queue is not None:
+                progress_queue.put((package, "algo_start", algo))
+            func = globals()[algo]
+            if not base_result:
+                if algo == "homoglyph":
+                    base_result = func(
+                        package,
+                        resultList,
+                        False,
+                        limit,
+                        givevariations,
+                        keeporiginal,
+                        all=all_homoglyph,
+                    )
+                else:
+                    base_result = func(
+                        package,
+                        resultList,
+                        False,
+                        limit,
+                        givevariations,
+                        keeporiginal,
+                    )
+                resultList = base_result.copy()
+            else:
+                loc_result = base_result.copy()
+                for r in loc_result:
+                    if type(r) == list:
+                        r = r[0]
+                    if algo == "homoglyph":
+                        loc_result = func(
+                            r,
+                            loc_result,
+                            False,
+                            limit,
+                            givevariations,
+                            keeporiginal,
+                            all=all_homoglyph,
+                            combo=True,
+                        )
+                    else:
+                        loc_result = func(
+                            r,
+                            loc_result,
+                            False,
+                            limit,
+                            givevariations,
+                            keeporiginal,
+                            True,
+                        )
+                resultList = resultList + loc_result
+                base_result = loc_result
+            if progress_queue is not None:
+                progress_queue.put((package, "algo_done", algo))
+    else:
+        for algo in selected_algos:
+            if progress_queue is not None:
+                progress_queue.put((package, "algo_start", algo))
+            func = globals()[algo]
+            if algo == "homoglyph":
+                resultList = func(
+                    package,
+                    resultList,
+                    False,
+                    limit,
+                    givevariations,
+                    keeporiginal,
+                    all=all_homoglyph,
+                )
+            else:
+                resultList = func(
+                    package,
+                    resultList,
+                    False,
+                    limit,
+                    givevariations,
+                    keeporiginal,
+                )
+            if progress_queue is not None:
+                progress_queue.put((package, "algo_done", algo))
+
+    if progress_queue is not None:
+        progress_queue.put((package, "done", len(resultList)))
+
+    return (package, resultList)
+
+
+def _progress_listener(queue, worker_bars):
+    """Background thread that reads worker progress messages and updates per-worker bars."""
+    slot_map = {}  # package_name -> bar_index
+    free_slots = list(range(len(worker_bars)))
+
+    while True:
+        msg = queue.get()
+        if msg is None:
+            break
+
+        package, event, data = msg
+
+        if event == "start":
+            if free_slots:
+                slot = free_slots.pop(0)
+            else:
+                continue
+            slot_map[package] = slot
+            bar = worker_bars[slot]
+            bar.bar_format = (
+                "  {desc}: {percentage:3.0f}%|{bar:20}| {n_fmt}/{total_fmt} [{postfix}]"
+            )
+            bar.reset(total=data)
+            bar.set_description(package)
+            bar.refresh()
+        elif event == "algo_start":
+            if package in slot_map:
+                worker_bars[slot_map[package]].set_postfix_str(data)
+        elif event == "algo_done":
+            if package in slot_map:
+                worker_bars[slot_map[package]].update(1)
+        elif event == "done":
+            if package in slot_map:
+                slot = slot_map.pop(package)
+                bar = worker_bars[slot]
+                bar.bar_format = "{desc}"
+                bar.set_description("")
+                bar.clear()
+                free_slots.append(slot)
+
+
 def main():
     # Step 1: Get the arguments
     parser = getArguments()
     args = parser.parse_args()
-
-    resultList = list()
 
     # Step 2: Assign some variables
     verbose = args.v
     givevariations = args.givevariations
     keeporiginal = args.keeporiginal
     ecosystem = args.ecosystem
+    training_mode = args.training
+
+    # Training mode forces givevariations to get technique labels
+    if training_mode:
+        givevariations = True
 
     limit = math.inf
     if args.limit:
@@ -190,7 +387,7 @@ def main():
 
     pathOutput = args.output
 
-    if pathOutput and not pathOutput == "-":
+    if pathOutput and not pathOutput == "-" and not training_mode:
         try:
             os.makedirs(pathOutput)
         except:
@@ -211,146 +408,185 @@ def main():
         packageList = args.packageName
     elif args.filepackageName:
         with open(args.filepackageName, "r") as read_file:
-            packageList = [
-                line.strip() for line in read_file.readlines() if line.strip()
-            ]
+            if args.filepackageName.endswith(".json"):
+                packageList = json.load(read_file)
+            else:
+                packageList = [
+                    line.strip() for line in read_file.readlines() if line.strip()
+                ]
     else:
         print("[-] No Entry")
         parser.print_help()
         exit(-1)
 
-    # Step 4: Process each package
-    for package in packageList:
-        package = package.strip()
-        if not package:
-            continue
+    # Step 4: Determine processing mode and selected algorithms
+    if args.combo:
+        mode = "combo"
+    elif args.all:
+        mode = "all"
+    else:
+        mode = "individual"
 
-        if pathOutput:
-            print(f"\n\t[*****] {package} ({ecosystem}) [*****]")
+    selected_algos = []
+    if mode in ("combo", "individual"):
+        algo_list = get_algo_list(ecosystem)
+        for arg in vars(args):
+            for algo in algo_list:
+                if algo.lower() == arg and getattr(args, arg):
+                    selected_algos.append(algo)
 
-        # Determine which algorithms to run
-        if args.combo:
-            base_result = list()
-            algo_list = get_algo_list(ecosystem)
-            for arg in vars(args):
-                for algo in algo_list:
-                    if algo.lower() == arg:
-                        if getattr(args, arg):
-                            if verbose:
-                                print(f"[+] {algo}")
+    workers = args.workers if args.workers is not None else os.cpu_count() or 1
+    total_packages = len(packageList)
+    workers = min(workers, total_packages)
 
-                            func = globals()[algo]
-                            # First Iteration
-                            if not base_result:
-                                if algo == "homoglyph":
-                                    base_result = func(
-                                        package,
-                                        resultList,
-                                        False,
-                                        limit,
-                                        givevariations,
-                                        keeporiginal,
-                                        all=args.all_homoglyph,
-                                    )
-                                else:
-                                    base_result = func(
-                                        package,
-                                        resultList,
-                                        False,
-                                        limit,
-                                        givevariations,
-                                        keeporiginal,
-                                    )
-                                resultList = base_result.copy()
+    # Step 5: Process packages
+    training_results = []
+    total_squats = 0
 
-                                if verbose:
-                                    print(f"{len(resultList)}\n")
-                            else:
-                                loc_result = list()
-                                loc_result = base_result.copy()
-                                for r in loc_result:
-                                    if type(r) == list:
-                                        r = r[0]
-
-                                    if algo == "homoglyph":
-                                        loc_result = func(
-                                            r,
-                                            loc_result,
-                                            False,
-                                            limit,
-                                            givevariations,
-                                            keeporiginal,
-                                            all=args.all_homoglyph,
-                                            combo=True,
-                                        )
-                                    else:
-                                        loc_result = func(
-                                            r,
-                                            loc_result,
-                                            False,
-                                            limit,
-                                            givevariations,
-                                            keeporiginal,
-                                            True,
-                                        )
-                                resultList = resultList + loc_result
-                                base_result = loc_result
-
-                                if verbose:
-                                    print(f"{len(loc_result)}\n")
-        elif args.all:
-            resultList = runAll(
-                package=package,
-                ecosystem=ecosystem,
-                limit=limit,
-                formatoutput=None,
-                pathOutput=None,
-                verbose=verbose,
-                givevariations=givevariations,
-                keeporiginal=keeporiginal,
-                all_homoglyph=args.all_homoglyph,
-            )
-        else:
-            algo_list = get_algo_list(ecosystem)
-            for arg in vars(args):
-                for algo in algo_list:
-                    if algo.lower() == arg:
-                        if getattr(args, arg):
-                            func = globals()[algo]
-                            if algo == "homoglyph":
-                                resultList = func(
-                                    package,
-                                    resultList,
-                                    verbose,
-                                    limit,
-                                    givevariations,
-                                    keeporiginal,
-                                    all=args.all_homoglyph,
-                                )
-                            else:
-                                resultList = func(
-                                    package,
-                                    resultList,
-                                    verbose,
-                                    limit,
-                                    givevariations,
-                                    keeporiginal,
-                                )
-
-        # Step 5: Final treatment
-        if verbose:
-            print(f"Total: {len(resultList)}")
-
-        formatOutput(
-            formatoutput,
-            resultList,
-            package,
-            pathOutput,
+    run_args = [
+        (
+            pkg,
+            ecosystem,
+            limit,
             givevariations,
-            args.betterregex,
+            keeporiginal,
+            args.all_homoglyph,
+            mode,
+            selected_algos,
+        )
+        for pkg in packageList
+    ]
+
+    if workers > 1:
+        manager = Manager()
+        progress_queue = manager.Queue()
+
+        overall_bar = tqdm(
+            total=total_packages,
+            desc="Overall",
+            position=0,
+            unit="pkg",
+            file=sys.stderr,
+        )
+        worker_bars = [
+            tqdm(
+                total=0,
+                position=i + 1,
+                bar_format="{desc}",
+                leave=False,
+                file=sys.stderr,
+            )
+            for i in range(workers)
+        ]
+
+        listener = threading.Thread(
+            target=_progress_listener,
+            args=(progress_queue, worker_bars),
+            daemon=True,
+        )
+        listener.start()
+
+        executor = ProcessPoolExecutor(max_workers=workers)
+        futures = {
+            executor.submit(_run_package, *a, progress_queue): a[0] for a in run_args
+        }
+
+        try:
+            for future in as_completed(futures):
+                package, resultList = future.result()
+                overall_bar.update(1)
+
+                if not package:
+                    continue
+
+                total_squats += len(resultList)
+                overall_bar.set_postfix(squats=total_squats)
+
+                if training_mode:
+                    training_results.append((package, resultList))
+                    training_output = pathOutput if pathOutput else "-"
+                    if training_output != "-" and len(training_results) >= 50:
+                        appendTrainingData(
+                            training_results,
+                            training_output,
+                            args.training_format,
+                        )
+                        training_results = []
+                else:
+                    formatOutput(
+                        formatoutput,
+                        resultList,
+                        package,
+                        pathOutput,
+                        givevariations,
+                        args.betterregex,
+                    )
+        finally:
+            progress_queue.put(None)
+            listener.join(timeout=5)
+            executor.shutdown(wait=False)
+            for bar in worker_bars:
+                bar.close()
+            manager.shutdown()
+
+        overall_bar.set_description("Done")
+        overall_bar.set_postfix(squats=total_squats)
+        overall_bar.close()
+
+    else:
+        # Single worker: simple sequential processing with per-algo progress
+        pkg_bar = tqdm(
+            total=total_packages,
+            desc="Processing",
+            unit="pkg",
+            file=sys.stderr,
         )
 
-        resultList = list()
+        for args_tuple in run_args:
+            package, resultList = _run_package(*args_tuple)
+            pkg_bar.set_description(package or "skip")
+            pkg_bar.update(1)
+
+            if not package:
+                continue
+
+            if verbose:
+                tqdm.write(f"{package}: {len(resultList)} variations", file=sys.stderr)
+
+            total_squats += len(resultList)
+            pkg_bar.set_postfix(squats=total_squats)
+
+            if training_mode:
+                training_results.append((package, resultList))
+                training_output = pathOutput if pathOutput else "-"
+                if training_output != "-" and len(training_results) >= 50:
+                    appendTrainingData(
+                        training_results, training_output, args.training_format
+                    )
+                    training_results = []
+            else:
+                formatOutput(
+                    formatoutput,
+                    resultList,
+                    package,
+                    pathOutput,
+                    givevariations,
+                    args.betterregex,
+                )
+
+        pkg_bar.set_description("Done")
+        pkg_bar.set_postfix(squats=total_squats)
+        pkg_bar.close()
+
+    # Step 6: Write training data if in training mode
+    if training_mode:
+        training_output = pathOutput if pathOutput else "-"
+        if training_output == "-":
+            # Stdout: write everything at once
+            formatTrainingData(training_results, training_output, args.training_format)
+        elif training_results:
+            # Flush remaining buffered results to file
+            appendTrainingData(training_results, training_output, args.training_format)
 
 
 # Main file function

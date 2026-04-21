@@ -1,3 +1,4 @@
+from pkg_typo_squatting.format.training import appendTrainingData, formatTrainingData
 from pkg_typo_squatting.generator.utils.generator_functions import parse_package_name
 
 # npm-specific generators

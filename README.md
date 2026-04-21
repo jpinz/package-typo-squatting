@@ -84,7 +84,7 @@ $ uv run pkg-typo-squatting -pn express -e npm -om --npmsuffix --npmscopesquat -
 5. Generate from a file of package names:
 
 ```bash
-$ uv run pkg-typo-squatting -fpn packages.txt -e pypi -a -o .
+$ uv run pkg-typo-squatting -fpn packages.json -e npm -a -o .
 ```
 
 # Used as a library
